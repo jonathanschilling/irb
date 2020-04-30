@@ -2,23 +2,28 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.labathome</groupId>
+
+	<parent>
+		<groupId>de.labathome</groupId>
+		<artifactId>de-labathome-parent</artifactId>
+		<version>1.0.0</version>
+	</parent>
+
 	<artifactId>irb</artifactId>
-	<version>1.0.0</version>
+	<version>0.0.1</version>
+	<packaging>jar</packaging>
+
 	<name>irb</name>
 	<description>*.irb file format reader in Java</description>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+	<url>${jonathanschilling.git.url}${project.name}</url>
+	<scm>
+		<connection>${jonathanschilling.git.root}${project.name}.git</connection>
+		<developerConnection>${jonathanschilling.git.root}${project.name}.git</developerConnection>
+		<url>${jonathanschilling.git.url}${project.name}/tree/master</url>
+	</scm>
+	<issueManagement>
+		<url>${jonathanschilling.git.url}${project.name}/issues</url>
+		<system>GitLab Issues</system>
+	</issueManagement>
 </project>

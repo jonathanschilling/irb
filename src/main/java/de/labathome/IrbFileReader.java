@@ -1,4 +1,4 @@
-package irb;
+package de.labathome;
 
 import java.io.File;
 import java.io.RandomAccessFile;
@@ -7,10 +7,11 @@ import java.nio.channels.FileChannel;
 import java.util.logging.Logger;
 
 /**
- * A reading class for the *.irb file format by InfraTec
- * inspired by https://github.com/tomsoftware/Irbis-File-Format.
+ * A reading class for the *.irb file format by InfraTec,
+ * inspired by https://github.com/tomsoftware/Irbis-File-Format .
  * 
  * This is a pure hobby project. No copyright infringements or similar is intended.
+ * Please inform the author about possible legal issues before turning to a lawyer.
  * 
  * @author Jonathan Schilling (jonathan.schilling@mail.de)
  */
