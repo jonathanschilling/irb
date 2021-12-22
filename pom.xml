@@ -16,6 +16,10 @@
 	<name>irb</name>
 	<description>*.irb file format reader in Java</description>
 
+	<properties>
+		<app.mainClass>de.labathome.IrbFile</app.mainClass>
+	</properties>
+
 	<url>${jonathanschilling.git.url}${project.name}</url>
 	<scm>
 		<connection>${jonathanschilling.git.root}${project.name}.git</connection>
@@ -26,12 +30,47 @@
 		<url>${jonathanschilling.git.url}${project.name}/issues</url>
 		<system>GitHub Issues</system>
 	</issueManagement>
-	
+
 	<dependencies>
-	   <dependency>
-	       <groupId>aliceinnets</groupId>
-	       <artifactId>java-jyplot</artifactId>
-	       <version>1.3.0</version>
-	   </dependency>
+		<dependency>
+			<groupId>aliceinnets</groupId>
+			<artifactId>java-jyplot</artifactId>
+			<version>1.3.0</version>
+		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.0.0</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<appendAssemblyId>false</appendAssemblyId>
+					<archive>
+						<manifest>
+							<mainClass>${app.mainClass}</mainClass>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+						</manifest>
+						<manifestEntries>
+							<Build-Revision>${buildNumber}</Build-Revision>
+							<Build-Timestamp>${maven.build.timestamp}</Build-Timestamp>
+						</manifestEntries>
+					</archive>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	
 </project>
