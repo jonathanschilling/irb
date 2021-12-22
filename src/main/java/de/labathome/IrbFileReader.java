@@ -2,6 +2,7 @@ package de.labathome;
 
 import java.io.File;
 import java.io.RandomAccessFile;
+import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
@@ -18,32 +19,7 @@ import java.util.logging.Logger;
  */
 public class IrbFileReader implements AutoCloseable {
 
-	/** \ff I R B \0 */
-	private static final byte[] MAGIC_ID = {
-			(byte) 0xff,
-			(byte) 0x49,
-			(byte) 0x52,
-			(byte) 0x42,
-			(byte) 0x0
-	};
-
-	public static enum FileType {
-		/** single image; identified by "IRBACS\0\0" */
-		IMAGE("IRBACS\0\0"),
-
-		/** sequence of images; idenfitied by "IRBIS 3\0" */
-		SEQUENCE("IRBIS 3\0"),
-
-		/** specific camera model; identified by "VARIOCAM" */
-		VARIOCAM("VARIOCAM");
-
-		private FileType(String content) {
-			this.content = content;
-		}
-
-		private String content;
-		public String getContent() { return content; }
-	}
+	IrbHeader header;
 
 	private static Logger logger;
 	static {
@@ -60,33 +36,8 @@ public class IrbFileReader implements AutoCloseable {
 		try (RandomAccessFile memoryFile = new RandomAccessFile(filename, "r")) {
 			MappedByteBuffer buf = memoryFile.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, memoryFile.length());
 
-			final byte[] magic = new byte[5];
-			buf.get(magic);
-
-			// parse magic number ID
-			if (!Arrays.equals(magic, MAGIC_ID)) {
-				throw new RuntimeException("first 5 magic bytes invalid");
-			}
-
-			// read file type
-			final byte[] fileType = new byte[8];
-			buf.get(fileType);
-			String fileTypeStr = new String(fileType);
-			if (fileTypeStr.equals(FileType.IMAGE.getContent())) {
-				logger.info("image");
-
-			} else if (fileTypeStr.equals(FileType.SEQUENCE.getContent())) {
-				logger.info("sequence");
-
-			} else if (fileTypeStr.equals(FileType.VARIOCAM.getContent())) {
-				logger.info("VARIOCAM");
-
-			} else {
-				throw new RuntimeException("file type bytes invalid");
-			}
-
-
-
+			// parse header and header blocks
+			header = new IrbHeader(buf);
 
 
 
@@ -101,7 +52,6 @@ public class IrbFileReader implements AutoCloseable {
 	public void close() throws Exception {
 		logger.info("close");
 	}
-
 
 
 	public static void main(String[] args) {
