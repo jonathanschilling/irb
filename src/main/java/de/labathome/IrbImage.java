@@ -3,6 +3,8 @@ package de.labathome;
 import java.nio.ByteBuffer;
 import java.util.Date;
 
+import aliceinnets.python.jyplot.JyPlot;
+
 public class IrbImage {
 
 	private static final int FLAGS_OFFSET = 1084;
@@ -178,6 +180,11 @@ public class IrbImage {
 
 		float[] palette = readPalette(buf, offset + paletteOffset);
 
+//		float maxPalette = palette[palette.length-1];
+//		for (int i=0; i<palette.length; ++i) {
+//			palette[i] = i*maxPalette/palette.length;
+//		}
+//
 //		JyPlot plt = new JyPlot();
 //		plt.figure();
 //		plt.plot(palette);
@@ -189,6 +196,9 @@ public class IrbImage {
 		float v = 0.0F;
 
 		float f;
+
+		int v1Min = 1000;
+		int v1Max = -1000;
 
 		if (useCompression) {
 			// compression active: run-length encoding
@@ -204,6 +214,13 @@ public class IrbImage {
 
 				v1 = buf.get(offset + v1_pos);
 				v1_pos++;
+
+				if (v1 < 0) {
+					v1 += 256;
+				}
+
+				v1Min = Math.min(v1Min, v1);
+				v1Max = Math.max(v1Max, v1);
 
 				f = v1 / 256.0F;
 
@@ -225,6 +242,13 @@ public class IrbImage {
 				v2 = buf.get(offset + v1_pos);
 				v1_pos++;
 
+				if (v1 < 0) {
+					v1 += 256;
+				}
+
+				v1Min = Math.min(v1Min, v1);
+				v1Max = Math.max(v1Max, v1);
+
 				f = v1 / 256.0F;
 
 				// linear interpolation between neighboring palette entries
@@ -238,12 +262,24 @@ public class IrbImage {
 			}
 		}
 
+		System.out.println("v2 min " + v1Min);
+		System.out.println("v2 max " + v1Max);
+
+		float minData = Float.POSITIVE_INFINITY;
+		float maxData = Float.NEGATIVE_INFINITY;
+
 		data = new float[height][width];
 		for (int i=0; i<pixelCount; ++i) {
 			final int row = i/width;
 			final int col = i%width;
 			data[row][col] = matrixData[i];
+
+			minData = Math.min(minData, matrixData[i]);
+			maxData = Math.max(maxData, matrixData[i]);
 		}
+
+		System.out.println("data min: " + minData);
+		System.out.println("data max: " + maxData);
 	}
 
 	/**
