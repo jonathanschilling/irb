@@ -22,6 +22,7 @@ import aliceinnets.python.jyplot.JyPlot;
  * to a lawyer.
  *
  * @author Jonathan Schilling (jonathan.schilling@mail.de)
+ * @author Benjamin Schilling (benjamin.schilling33@gmail.com)
  */
 public class IrbFile {
 
@@ -123,8 +124,12 @@ public class IrbFile {
 					plt.title(String.format("image %d", i));
 
 					System.out.println("\n\nimage " + i);
-					System.out.println(" env temp: "+image.environmentalTemp);
-					System.out.println("path temp: "+image.pathTemperature);
+					System.out.printf("            env temp: %g °C\n", image.environmentalTemp - IrbImage.CELSIUS_OFFSET);
+					System.out.printf("           path temp: %g °C\n", image.pathTemperature - IrbImage.CELSIUS_OFFSET);
+					System.out.printf("     calib range min: %g °C\n", image.calibRangeMin - IrbImage.CELSIUS_OFFSET);
+					System.out.printf("     calib range max: %g °C\n", image.calibRangeMax - IrbImage.CELSIUS_OFFSET);
+					System.out.printf("shot range start err: %g °C\n", image.shotRangeStartErr - IrbImage.CELSIUS_OFFSET);
+					System.out.printf("     shot range size: %g  K\n", image.shotRangeSize);
 
 					i++;
 				}

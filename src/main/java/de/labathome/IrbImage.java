@@ -3,12 +3,10 @@ package de.labathome;
 import java.nio.ByteBuffer;
 import java.util.Date;
 
-import aliceinnets.python.jyplot.JyPlot;
-
 public class IrbImage {
 
 	private static final int FLAGS_OFFSET = 1084;
-	private static final float CELSIUS_OFFSET = 273.15F;
+	public static final float CELSIUS_OFFSET = 273.15F;
 
 	public int width;
 	public int height;
