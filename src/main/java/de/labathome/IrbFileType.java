@@ -15,4 +15,13 @@ public enum IrbFileType {
 	}
 
 	private String content;
+
+	public static IrbFileType fromString(String content) {
+		for (IrbFileType t: IrbFileType.values()) {
+			if (t.content.equals(content)) {
+				return t;
+			}
+		}
+		return null;
+	}
 }

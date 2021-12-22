@@ -3,17 +3,11 @@ package de.labathome;
 public enum IrbBlockType {
 
 	UNKNOWN(-1),
-
 	EMPTY(0),
-
 	IMAGE(1),
-
 	PREVIEW(2),
-
 	TEXT_INFO(3),
-
 	HEADER(4),
-
 	AUDIO(7);
 
 	private IrbBlockType(int value) {

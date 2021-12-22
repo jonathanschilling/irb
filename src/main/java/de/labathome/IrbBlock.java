@@ -2,53 +2,29 @@ package de.labathome;
 
 import java.nio.ByteBuffer;
 
-public class IrbHeaderBlock {
+public class IrbBlock {
 
+	// header data
 	public IrbBlockType blockType;
-
 	public int dword2;
-
 	public int frameIndex;
-
 	public int offset;
-
 	public int size;
-
 	public int dword6;
-
 	public int dword7;
-
 	public int dword8;
-
 	public int headerOffset;
-
 	public int headerSize;
-
 	public int imageOffset;
-
 	public int imageSize;
 
-	public IrbHeaderBlock(ByteBuffer buf, int offset, int count) {
+	public byte[] imageData;
 
-		buf.position(offset);
-		if (!buf.hasRemaining()) {
-			System.out.println("EOF");
-			return;
-		}
+	public IrbBlock(ByteBuffer buf) {
 
-		for (int i=0; i<count; ++i) {
-			if (!buf.hasRemaining()) {
-				System.out.println("EOF " + i);
-				return;
-			}
-			initBlock(buf);
-		}
-	}
-
-	private void initBlock(ByteBuffer buf) {
+		// read header
 
 		blockType = IrbBlockType.fromInt(buf.getInt());
-
 		System.out.printf("found block: %s\n", blockType);
 
 		dword2 = buf.getInt();
@@ -74,5 +50,23 @@ public class IrbHeaderBlock {
 		dword6 = buf.getInt();
 		dword7 = buf.getInt();
 		dword8 = buf.getInt();
+	}
+
+	/**
+	 * Read the image data corresponding to this block.
+	 *
+	 * @param buf buffer to read image from
+	 */
+	public void readImage(ByteBuffer buf) {
+		// save current buffer position
+		int oldPos = buf.position();
+
+		// read image data
+		imageData = new byte[size];
+		buf.position(offset);
+		buf.get(imageData);
+
+		// restore old position
+		buf.position(oldPos);
 	}
 }

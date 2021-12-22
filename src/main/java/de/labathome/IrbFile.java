@@ -1,12 +1,11 @@
 package de.labathome;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteOrder;
+import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.Arrays;
-import java.util.logging.Logger;
 
 /**
  * A reading class for the *.irb file format by InfraTec,
@@ -17,50 +16,48 @@ import java.util.logging.Logger;
  *
  * @author Jonathan Schilling (jonathan.schilling@mail.de)
  */
-public class IrbFileReader implements AutoCloseable {
+public class IrbFile {
 
 	IrbHeader header;
 
-	private static Logger logger;
-	static {
-		logger = Logger.getLogger(IrbFileReader.class.getName());
-	}
-
-	public IrbFileReader(String filename) {
-		logger.info("reading '"+filename+"'");
-
+	public static IrbFile fromFile(String filename) throws IOException {
 		if (! (new File(filename).exists())) {
 			throw new RuntimeException("File '"+filename+"' does not exists!");
 		}
 
-		try (RandomAccessFile memoryFile = new RandomAccessFile(filename, "r")) {
-			MappedByteBuffer buf = memoryFile.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, memoryFile.length());
+		RandomAccessFile memoryFile = new RandomAccessFile(filename, "r");
+		MappedByteBuffer buf = memoryFile.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, memoryFile.length());
 
-			// parse header and header blocks
-			header = new IrbHeader(buf);
+		IrbFile file = new IrbFile(buf);
+
+		memoryFile.close();
+
+		return file;
+	}
+
+	public IrbFile(ByteBuffer buf) {
+
+		// parse header and header blocks
+		header = new IrbHeader(buf);
 
 
-
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
 
 	}
-
-	public void close() throws Exception {
-		logger.info("close");
-	}
-
 
 	public static void main(String[] args) {
 		if (args != null && args.length>0) {
 
 			String filename = args[0];
-			try (IrbFileReader reader = new IrbFileReader(filename)) {
+			try {
+				IrbFile irbFile = IrbFile.fromFile(filename);
 
-				// do something nice
+
+
+
+
+
+
 
 			} catch (Exception e) {
 				e.printStackTrace();

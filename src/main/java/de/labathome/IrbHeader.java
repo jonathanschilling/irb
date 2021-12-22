@@ -26,7 +26,7 @@ public class IrbHeader {
 
 	/** starts at 0 */
 	private int blockOffset;
-	public List<IrbHeaderBlock> blocks;
+	public List<IrbBlock> blocks;
 
 	private int imageCount;
 
@@ -43,7 +43,7 @@ public class IrbHeader {
 		// read file type
 		final byte[] fileTypeBytes = new byte[8];
 		buf.get(fileTypeBytes);
-		fileType = IrbFileType.valueOf(new String(fileTypeBytes));
+		fileType = IrbFileType.fromString(new String(fileTypeBytes));
 
 		// second file type identifier; gets ignored
 		buf.get(fileTypeBytes);
@@ -56,15 +56,21 @@ public class IrbHeader {
 		blockOffset = buf.getInt();
 		firstBlockCount = buf.getInt();
 
-		// read first header block
-		IrbHeaderBlock firstHeaderBlock = new IrbHeaderBlock(buf, blockOffset, firstBlockCount);
-		if (firstHeaderBlock.blockType == IrbBlockType.IMAGE) {
-			imageCount++;
-		}
+		// read header blocks
 		blocks = new LinkedList<>();
-		blocks.add(firstHeaderBlock);
+		buf.position(blockOffset);
+		for (int i=0; i<firstBlockCount; ++i) {
+			IrbBlock headerBlock = new IrbBlock(buf);
+			blocks.add(headerBlock);
+		}
 
-
+		// read actual image data
+		for (IrbBlock block: blocks) {
+			if (block.blockType == IrbBlockType.IMAGE) {
+				block.readImage(buf);
+				imageCount++;
+			}
+		}
 
 
 	}
