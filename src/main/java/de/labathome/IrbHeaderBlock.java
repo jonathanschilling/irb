@@ -2,7 +2,7 @@ package de.labathome;
 
 import java.nio.ByteBuffer;
 
-public class IrbBlock {
+public class IrbHeaderBlock {
 
 	// header data
 	public IrbBlockType blockType;
@@ -18,9 +18,7 @@ public class IrbBlock {
 	public int imageOffset;
 	public int imageSize;
 
-	public byte[] imageData;
-
-	public IrbBlock(ByteBuffer buf) {
+	public IrbHeaderBlock(ByteBuffer buf) {
 
 		// read header
 
@@ -50,23 +48,5 @@ public class IrbBlock {
 		dword6 = buf.getInt();
 		dword7 = buf.getInt();
 		dword8 = buf.getInt();
-	}
-
-	/**
-	 * Read the image data corresponding to this block.
-	 *
-	 * @param buf buffer to read image from
-	 */
-	public void readImage(ByteBuffer buf) {
-		// save current buffer position
-		int oldPos = buf.position();
-
-		// read image data
-		imageData = new byte[size];
-		buf.position(offset);
-		buf.get(imageData);
-
-		// restore old position
-		buf.position(oldPos);
 	}
 }
