@@ -1,6 +1,7 @@
 package de.labathome;
 
 public enum IrbFileType {
+
 	/** single image; identified by "IRBACS\0\0" */
 	IMAGE("IRBACS\0\0"),
 

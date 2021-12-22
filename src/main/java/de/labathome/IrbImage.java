@@ -3,8 +3,6 @@ package de.labathome;
 import java.nio.ByteBuffer;
 import java.util.Date;
 
-import aliceinnets.python.jyplot.JyPlot;
-
 public class IrbImage {
 
 	private static final int FLAGS_OFFSET = 1084;
@@ -32,12 +30,9 @@ public class IrbImage {
 	public int timestampMillisecond;
 	public Date timestamp;
 	public float[][] data;
-
-	private static void checkIs(int expected, int val) {
-		if (expected != val) {
-			System.out.printf("expected %d but got %d\n", expected, val);
-		}
-	}
+	public float[] palette;
+	public float minData;
+	public float maxData;
 
 	/**
 	 * Read the image data corresponding to this block.
@@ -79,6 +74,7 @@ public class IrbImage {
 		}
 
 		// don't know: always 0
+		// TODO: is -32768 for VARIOCAM
 		checkIs(0, buf.getShort());
 
 		// don't know: always 0
@@ -92,14 +88,17 @@ public class IrbImage {
 		checkIs(0, buf.getShort());
 
 		// don't know: always 0
+		// TODO: is -32768 for VARIOCAM
 		checkIs(0, buf.getShort());
 
 		pathTemperature = buf.getFloat();
 
 		// don't know: always 0x65
+		// TODO: is 0 for VARIOCAM
 		checkIs(0x65, buf.getShort());
 
 		// don't know: always 0
+		// TODO: is 16256 for VARIOCAM
 		checkIs(0, buf.getShort());
 
 		centerWavelength = buf.getFloat();
@@ -107,7 +106,7 @@ public class IrbImage {
 		// don't know: always 0
 		checkIs(0, buf.getShort());
 
-		// don't know: always 0xh4080
+		// don't know: always 0x4080
 		checkIs(0x4080, buf.getShort());
 
 		// don't know: always 0x9
@@ -178,19 +177,7 @@ public class IrbImage {
 		int v1 = 0;
 		int v2 = 0;
 
-		float[] palette = readPalette(buf, offset + paletteOffset);
-
-//		float maxPalette = palette[palette.length-1];
-//		for (int i=0; i<palette.length; ++i) {
-//			palette[i] = i*maxPalette/palette.length;
-//		}
-//
-//		JyPlot plt = new JyPlot();
-//		plt.figure();
-//		plt.plot(palette);
-//		plt.grid(true);
-//		plt.show();
-//		plt.exec();
+		palette = readPalette(buf, offset + paletteOffset);
 
 		int v2_count = 0;
 		float v = 0.0F;
@@ -210,6 +197,10 @@ public class IrbImage {
 					v2_pos++;
 					v2 = buf.get(offset + v2_pos);
 					v2_pos++;
+
+					if (v2 < 0) {
+						v2 += 256;
+					}
 				}
 
 				v1 = buf.get(offset + v1_pos);
@@ -246,6 +237,10 @@ public class IrbImage {
 					v1 += 256;
 				}
 
+				if (v2 < 0) {
+					v2 += 256;
+				}
+
 				v1Min = Math.min(v1Min, v1);
 				v1Max = Math.max(v1Max, v1);
 
@@ -262,11 +257,11 @@ public class IrbImage {
 			}
 		}
 
-		System.out.println("v2 min " + v1Min);
-		System.out.println("v2 max " + v1Max);
+		System.out.println("v1 min " + v1Min);
+		System.out.println("v1 max " + v1Max);
 
-		float minData = Float.POSITIVE_INFINITY;
-		float maxData = Float.NEGATIVE_INFINITY;
+		minData = Float.POSITIVE_INFINITY;
+		maxData = Float.NEGATIVE_INFINITY;
 
 		data = new float[height][width];
 		for (int i=0; i<pixelCount; ++i) {
@@ -285,7 +280,7 @@ public class IrbImage {
 	/**
 	 * Get image in deg. Celsius
 	 *
-	 * @return
+	 * @return [height][width] image data
 	 */
 	public float[][] getCelsiusImage() {
 		float[][] celsiusData = new float[height][width];
@@ -314,6 +309,12 @@ public class IrbImage {
 		return palette;
 	}
 
+	private static void checkIs(int expected, int val) {
+		if (expected != val) {
+			System.out.printf("expected %d but got %d\n", expected, val);
+		}
+	}
+
 	private static String readNullTerminatedString(ByteBuffer buf, int offset, int len) {
 		byte[] strBytes = new byte[len];
 		buf.position(offset);
@@ -321,14 +322,14 @@ public class IrbImage {
 		return new String(strBytes).trim();
 	}
 
-	public static Date fromDoubleToDateTime(double OADate)
-	{
+	/** from https://stackoverflow.com/a/23673012 */
+	private static Date fromDoubleToDateTime(double OADate) {
 	    long num = (long) ((OADate * 86400000.0) + ((OADate >= 0.0) ? 0.5 : -0.5));
 	    if (num < 0L) {
 	        num -= (num % 0x5265c00L) * 2L;
 	    }
 	    num += 0x3680b5e1fc00L;
-	    num -=  62135596800000L;
+	    num -= 62135596800000L;
 
 	    return new Date(num);
 	}

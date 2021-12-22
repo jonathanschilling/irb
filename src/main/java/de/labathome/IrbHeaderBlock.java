@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 
 public class IrbHeaderBlock {
 
-	// header data
 	public IrbBlockType blockType;
 	public int dword2;
 	public int frameIndex;
