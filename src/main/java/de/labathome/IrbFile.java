@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import aliceinnets.python.jyplot.JyPlot;
+
 /**
  * A reading class for the *.irb file format by InfraTec, inspired by
  * https://github.com/tomsoftware/Irbis-File-Format .
@@ -109,6 +111,26 @@ public class IrbFile {
 				IrbFile irbFile = IrbFile.fromFile(filename);
 
 				System.out.println("number of images: "+irbFile.images.size());
+
+				JyPlot plt = new JyPlot();
+
+				int i=0;
+				for (IrbImage image: irbFile.images) {
+
+					plt.figure();
+					plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('jet')");
+					plt.colorbar();
+					plt.title(String.format("image %d", i));
+
+					System.out.println("\n\nimage " + i);
+					System.out.println(" env temp: "+image.environmentalTemp);
+					System.out.println("path temp: "+image.pathTemperature);
+
+					i++;
+				}
+
+				plt.show();
+				plt.exec();
 
 			} catch (Exception e) {
 				e.printStackTrace();

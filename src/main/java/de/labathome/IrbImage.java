@@ -1,44 +1,37 @@
 package de.labathome;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Date;
+
+import aliceinnets.python.jyplot.JyPlot;
 
 public class IrbImage {
 
 	private static final int FLAGS_OFFSET = 1084;
+	private static final float CELSIUS_OFFSET = 273.15F;
 
-	private int width;
-	private int height;
-	private short bytePerPixel;
-	private short compressed;
-	private float emissivity;
-	private float distance;
-	private float environmentalTemp;
-	private float pathTemperature;
-	private float centerWavelength;
-
-	private float calibRangeMin;
-	private float calibRangeMax;
-	private String device;
-	private String deviceSerial;
-
-	private String optics;
-
-	private String opticsResolution;
-
-	private String opticsText;
-
-	private float shotRangeStartErr;
-
-	private float shotRangeSize;
-
-	private double timestampRaw;
-
-	private int timestampMillisecond;
-
-	private Date timestamp;
-
+	public int width;
+	public int height;
+	public short bytePerPixel;
+	public short compressed;
+	public float emissivity;
+	public float distance;
+	public float environmentalTemp;
+	public float pathTemperature;
+	public float centerWavelength;
+	public float calibRangeMin;
+	public float calibRangeMax;
+	public String device;
+	public String deviceSerial;
+	public String optics;
+	public String opticsResolution;
+	public String opticsText;
+	public float shotRangeStartErr;
+	public float shotRangeSize;
+	public double timestampRaw;
+	public int timestampMillisecond;
+	public Date timestamp;
+	public float[][] data;
 
 	private static void checkIs(int expected, int val) {
 		if (expected != val) {
@@ -133,10 +126,11 @@ public class IrbImage {
 		final int flagsPosition = offset + FLAGS_OFFSET;
 		readImageFlags(buf, flagsPosition);
 
-
-
-
-
+		// TODO: is this IrbHeaderBlock.headerSize ???
+		int bindataOffset = 0x6c0;
+		int paletteOffset = 60;
+		boolean useCompression = (compressed != 0);
+		readImageData(buf, offset, bindataOffset, width, height, paletteOffset, useCompression);
 
 		// restore old position
 		buf.position(oldPos);
@@ -167,6 +161,125 @@ public class IrbImage {
 		buf.position(oldPos);
 	}
 
+	private void readImageData(ByteBuffer buf, int offset, int bindataOffset, int width, int height, int paletteOffset, boolean useCompression) {
+
+		int dataSize = width * height;
+
+		int pixelCount = dataSize;
+		float[] matrixData = new float[pixelCount];
+
+		int matrixDataPos = 0;
+
+		int v1_pos = bindataOffset;
+
+		// used if data is compressed
+		int v2_pos = v1_pos + pixelCount;
+
+		int v1 = 0;
+		int v2 = 0;
+
+		float[] palette = readPalette(buf, offset + paletteOffset);
+
+//		JyPlot plt = new JyPlot();
+//		plt.figure();
+//		plt.plot(palette);
+//		plt.grid(true);
+//		plt.show();
+//		plt.exec();
+
+		int v2_count = 0;
+		float v = 0.0F;
+
+		float f;
+
+		if (useCompression) {
+			// compression active: run-length encoding
+
+			for (int i=pixelCount; i>0; i--) {
+
+				if (v2_count-- < 1) {
+					v2_count = buf.get(offset + v2_pos) - 1;
+					v2_pos++;
+					v2 = buf.get(offset + v2_pos);
+					v2_pos++;
+				}
+
+				v1 = buf.get(offset + v1_pos);
+				v1_pos++;
+
+				f = v1 / 256.0F;
+
+				// linear interpolation between neighboring palette entries
+				v = palette[v2 + 1] * f + palette[v2] * (1.0F - f);
+				if (v < 0.0F) {
+					v = 0.0F; // or 255 ...
+				}
+
+				matrixData[matrixDataPos] = v;
+				matrixDataPos++;
+			}
+		} else {
+			// no compression
+			for (int i=pixelCount; i>0; i--) {
+
+				v1 = buf.get(offset + v1_pos);
+				v1_pos++;
+				v2 = buf.get(offset + v1_pos);
+				v1_pos++;
+
+				f = v1 / 256.0F;
+
+				// linear interpolation between neighboring palette entries
+				v = palette[v2 + 1] * f + palette[v2] * (1.0F - f);
+				if (v < 0.0F) {
+					v = 0.0F; // or 255 ...
+				}
+
+				matrixData[matrixDataPos] = v;
+				matrixDataPos++;
+			}
+		}
+
+		data = new float[height][width];
+		for (int i=0; i<pixelCount; ++i) {
+			final int row = i/width;
+			final int col = i%width;
+			data[row][col] = matrixData[i];
+		}
+	}
+
+	/**
+	 * Get image in deg. Celsius
+	 *
+	 * @return
+	 */
+	public float[][] getCelsiusImage() {
+		float[][] celsiusData = new float[height][width];
+		for (int i=0; i<height; ++i) {
+			for (int j=0; j<width; ++j) {
+				celsiusData[i][j] = data[i][j] - CELSIUS_OFFSET;
+			}
+		}
+		return celsiusData;
+	}
+
+	private float[] readPalette(ByteBuffer buf, int offset) {
+		// save current buffer position
+		final int oldPos = buf.position();
+
+		float[] palette = new float[256];
+
+		buf.position(offset);
+		for (int i=0; i<256; ++i) {
+			palette[i] = buf.getFloat();
+		}
+
+		// restore old position
+		buf.position(oldPos);
+
+		return palette;
+	}
+
 	private static String readNullTerminatedString(ByteBuffer buf, int offset, int len) {
 		byte[] strBytes = new byte[len];
 		buf.position(offset);
@@ -185,5 +298,4 @@ public class IrbImage {
 
 	    return new Date(num);
 	}
-
 }

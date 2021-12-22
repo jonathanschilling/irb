@@ -26,4 +26,12 @@
 		<url>${jonathanschilling.git.url}${project.name}/issues</url>
 		<system>GitLab Issues</system>
 	</issueManagement>
+	
+	<dependencies>
+	   <dependency>
+	       <groupId>aliceinnets</groupId>
+	       <artifactId>java-jyplot</artifactId>
+	       <version>1.3.0</version>
+	   </dependency>
+	</dependencies>
 </project>
