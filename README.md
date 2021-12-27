@@ -17,7 +17,17 @@ Please inform the author about possible legal issues before turning to a lawyer.
 2. Execute the jar with the `*.irb` file as first command line argument:
  
 ```bash
-> java -jar irb-1.0.0-with-dependencies.jar AB020300.irb
+> java -jar target/irb-1.0.0.jar AB020300.irb
+```
+
+Otherwise, you can include this project as a dependency in Maven:
+
+```xml
+<dependency>
+    <artifactId>irb</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+</dependency>
 ```
 
 ## Contributers
