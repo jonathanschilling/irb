@@ -142,6 +142,8 @@ public class IrbFile {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		} else {
+			System.out.println("usage: java -jar irb.jar /path/to/image.irb");
 		}
 	}
 
