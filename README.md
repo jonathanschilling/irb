@@ -13,10 +13,10 @@ Please inform the author about possible legal issues before turning to a lawyer.
 
 ## Building
 
-1. Download build dependencies
-   1. JDK 
+1. Download and install build dependencies
+   1. JDK 1.8 (or any newer version)
    2. Maven
-2. Build a runnable jar file:
+2. Build a runnable self-contained jar file:
 
 ```bash
 > mvn clean package
