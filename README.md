@@ -8,17 +8,44 @@ Please inform the author about possible legal issues before turning to a lawyer.
 
 ## Usage
 
+This program can be used either as a Maven dependency within another program
+or as a stand-alone commandline utility.
+
+Execute the jar with the `*.irb` file as first command line argument:
+ 
+```bash
+> java -jar irb-1.0.0.jar AB020300.irb
+```
+
+This will generate two text output files:
+ * `AB020300.irb.img_0.dat` contains the raw image data in degree Celsius as a two-dimensional matrix.
+   Each line in the file contains the temperatures for each pixel of the corresponding line of the image.
+   The first line corresponds to the top of the image for easy plotting with e.g. Gnuplot:
+   ```
+   plot 'AB020300.irb.img_0.dat' matrix w image
+   ```
+ * `AB020300.irb.meta_0.json` contains the meta-data of the image in the JSON format.
+ 
+Additionally, a direct plot of the image is tried using `JyPlot`.
+This requires to have a Python installation with `matplotlib` and `numpy` on your `$PATH`.
+A temporary Python script file is created in a folder `PythonScript` in your home directory.
+This will be executed by the default `python` command.
+If JyPlot cannot find your `python` installation, it will print a corresponding stack trace of error messages.
+You can fix this by telling JyPlot about your Python installation by creating a text file
+`~/PythonScript/PYTHON_PATH.txt` which contains the absolute path to your Python executable
+(`python` on Linux and Mac, `python.exe` on Windows).
+
+The text output files should nevertheless get created.
+
+## Building
+
 1. Make a jar:
 
 ```bash
 > mvn clean package
 ```
 
-2. Execute the jar with the `*.irb` file as first command line argument:
- 
-```bash
-> java -jar target/irb-1.0.0.jar AB020300.irb
-```
+The output will be at `target/irb-1.0.0.jar`.
 
 Otherwise, you can include this project as a dependency in Maven:
 

@@ -1,38 +1,94 @@
 package de.labathome;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.nio.ByteBuffer;
 import java.util.Date;
+import java.util.Locale;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.Expose;
 
 public class IrbImage {
 
 	private static final int FLAGS_OFFSET = 1084;
 	public static final float CELSIUS_OFFSET = 273.15F;
 
+	@Expose(serialize = true)
 	public int width;
+
+	@Expose(serialize = true)
 	public int height;
+
+	@Expose(serialize = true)
 	public short bytePerPixel;
+
+	@Expose(serialize = true)
 	public short compressed;
+
+	@Expose(serialize = true)
 	public float emissivity;
+
+	@Expose(serialize = true)
 	public float distance;
+
+	@Expose(serialize = true)
 	public float environmentalTemp;
+
+	@Expose(serialize = true)
 	public float pathTemperature;
+
+	@Expose(serialize = true)
 	public float centerWavelength;
+
+	@Expose(serialize = true)
 	public float calibRangeMin;
+
+	@Expose(serialize = true)
 	public float calibRangeMax;
+
+	@Expose(serialize = true)
 	public String device;
+
+	@Expose(serialize = true)
 	public String deviceSerial;
+
+	@Expose(serialize = true)
 	public String optics;
+
+	@Expose(serialize = true)
 	public String opticsResolution;
+
+	@Expose(serialize = true)
 	public String opticsText;
+
+	@Expose(serialize = true)
 	public float shotRangeStartErr;
+
+	@Expose(serialize = true)
 	public float shotRangeSize;
+
+	@Expose(serialize = true)
 	public double timestampRaw;
+
+	@Expose(serialize = true)
 	public int timestampMillisecond;
+
+	@Expose(serialize = true)
 	public Date timestamp;
-	public float[][] data;
+
+	@Expose(serialize = true)
 	public float[] palette;
+
+	@Expose(serialize = true)
 	public float minData;
+
+	@Expose(serialize = true)
 	public float maxData;
+
+	@Expose(serialize = false)
+	public float[][] data;
 
 	/**
 	 * Read the image data corresponding to this block.
@@ -333,4 +389,43 @@ public class IrbImage {
 
 	    return new Date(num);
 	}
+
+	/**
+	 * Export all meta-data (except the actual image data) to a JSON file.
+	 * @param filename file to export metadata to
+	 */
+	public void exportMetaData(String filename) {
+		try (BufferedWriter w = new BufferedWriter(new FileWriter(filename))) {
+			Gson gson = new GsonBuilder()
+					.setPrettyPrinting()
+					.excludeFieldsWithoutExposeAnnotation()
+					.create();
+			String json = gson.toJson(this);
+			w.write(json);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Export image data as 2d text file.
+	 * @param filename file to export image data to
+	 */
+	public void exportImageData(String filename) {
+		try(BufferedWriter w = new BufferedWriter(new FileWriter(filename))) {
+			float[][] celsiusData = getCelsiusImage();
+			int height = celsiusData.length;
+			int width = celsiusData[0].length;
+			for (int i=height-1; i>=0; i--) {
+				for (int j=0; j<width; ++j) {
+					w.write(String.format(Locale.ENGLISH, "%8.6f ", celsiusData[i][j]));
+				}
+				w.write("\n");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+
 }

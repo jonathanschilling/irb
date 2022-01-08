@@ -113,17 +113,8 @@ public class IrbFile {
 
 				System.out.println("number of images: "+irbFile.images.size());
 
-				JyPlot plt = new JyPlot();
-
 				int i=0;
 				for (IrbImage image: irbFile.images) {
-
-					plt.figure();
-					plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('jet')");
-//					plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('gist_ncar')");
-//					plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('nipy_spectral')");
-					plt.colorbar();
-					plt.title(String.format("image %d", i));
 
 					System.out.println("\n\nimage " + i);
 					System.out.printf("            env temp: %g °C\n", image.environmentalTemp - IrbImage.CELSIUS_OFFSET);
@@ -133,11 +124,37 @@ public class IrbFile {
 					System.out.printf("shot range start err: %g °C\n", image.shotRangeStartErr - IrbImage.CELSIUS_OFFSET);
 					System.out.printf("     shot range size: %g  K\n", image.shotRangeSize);
 
+					// try to export data
+					try {
+						System.out.print("starting to export to text files... ");
+						image.exportImageData(String.format(filename+".img_%d.dat", i));
+						image.exportMetaData(String.format(filename+".meta_%d.json", i));
+						System.out.println("done");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+					// try to plot using JyPlot
+					try {
+						System.out.print("plot using JyPlot... ");
+						JyPlot plt = new JyPlot();
+
+						plt.figure();
+						plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('jet')");
+	//					plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('gist_ncar')");
+	//					plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('nipy_spectral')");
+						plt.colorbar();
+						plt.title(String.format("image %d", i));
+
+						plt.show();
+						plt.exec();
+						System.out.println("done");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
 					i++;
 				}
-
-				plt.show();
-				plt.exec();
 
 			} catch (Exception e) {
 				e.printStackTrace();
