@@ -73,6 +73,7 @@ The text output files should nevertheless get created.
 
  * [jonathanschilling](https://github.com/jonathanschilling)
  * [benjaminSchilling33](https://github.com/benjaminschilling33)
+ * [uhoefel](https://github.com/uhoefel)
 
 ## License
 
