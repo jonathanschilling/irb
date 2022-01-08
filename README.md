@@ -36,6 +36,9 @@ You can include this project as a dependency in Maven:
 </dependency>
 ```
 
+The ready-to-use jar can also be directly downloaded here:
+[irb-1.0.1.jar](https://github.com/jonathanschilling/irb/releases/download/v1.0.1/irb-1.0.1.jar)
+
 ## Command-line Usage
 
 Execute the jar with the `*.irb` file as first command line argument:
