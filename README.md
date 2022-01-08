@@ -14,10 +14,10 @@ or as a stand-alone commandline utility.
 Execute the jar with the `*.irb` file as first command line argument:
  
 ```bash
-> java -jar irb-1.0.0.jar AB020300.irb
+> java -jar irb-1.0.1.jar AB020300.irb
 ```
 
-This will generate two text output files:
+This will generate two text output files and a direct PNG equivalent of the data:
  * `AB020300.irb.img_0.dat` contains the raw image data in degree Celsius as a two-dimensional matrix.
    Each line in the file contains the temperatures for each pixel of the corresponding line of the image.
    The first line corresponds to the top of the image for easy plotting with e.g. Gnuplot:
@@ -25,6 +25,8 @@ This will generate two text output files:
    plot 'AB020300.irb.img_0.dat' matrix w image
    ```
  * `AB020300.irb.meta_0.json` contains the meta-data of the image in the JSON format.
+ * `AB020300.irb.img_0.png` contains a direct PNG export of the image data
+   with the temperature in degree Celsius mapped to a `jet`-like colorbar.
  
 Additionally, a direct plot of the image is tried using `JyPlot`.
 This requires to have a Python installation with `matplotlib` and `numpy` on your `$PATH`.
@@ -45,14 +47,14 @@ The text output files should nevertheless get created.
 > mvn clean package
 ```
 
-The output will be at `target/irb-1.0.0.jar`.
+The output will be at `target/irb-1.0.1.jar`.
 
 Otherwise, you can include this project as a dependency in Maven:
 
 ```xml
 <dependency>
     <artifactId>irb</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 </dependency>
 ```
