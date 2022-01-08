@@ -1,3 +1,8 @@
+/* irb
+ * IrbBlockType Class
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package de.labathome;
 
 public enum IrbBlockType {
