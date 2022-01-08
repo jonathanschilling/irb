@@ -21,7 +21,7 @@ public class ArrayToPNG {
 	 * @param filename The name of the image file.
 	 */
 	public static void dumpAsPng(float[][] a, String filename) {
-		dumpAsPng(a, null, null, filename, false);
+		dumpAsPng(a, null, null, filename, true);
 	}
 
 	/**
@@ -60,9 +60,9 @@ public class ArrayToPNG {
 		double maxval = a[0][0];
 		double minval = a[0][0];
 		for (int i=0; i<a.length; ++i) {
-			for (int j=0; j<a[i].length; ++i) {
+			for (int j=0; j<a[i].length; ++j) {
 				if (a[i][j] > maxval) { maxval = a[i][j]; }
-				if (a[i][j] < maxval) { minval = a[i][j]; }
+				if (a[i][j] < minval) { minval = a[i][j]; }
 			}
 		}
 
@@ -116,6 +116,9 @@ public class ArrayToPNG {
 						indexG = (int) Math.round(Math.abs((val-minval)/(maxval-minval)*(colormap[1].length-1)));
 						indexB = (int) Math.round(Math.abs((val-minval)/(maxval-minval)*(colormap[2].length-1)));
 					}
+					if (indexR >= colormap[0].length) { indexR = colormap[0].length-1; }
+					if (indexG >= colormap[1].length) { indexG = colormap[1].length-1; }
+					if (indexB >= colormap[2].length) { indexB = colormap[2].length-1; }
 					r = (int) (colormap[0][indexR]*MAXINT);
 					g = (int) (colormap[1][indexG]*MAXINT);
 					b = (int) (colormap[2][indexB]*MAXINT);
