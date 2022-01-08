@@ -426,6 +426,4 @@ public class IrbImage {
 			e.printStackTrace();
 		}
 	}
-
-
 }

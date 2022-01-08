@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import aliceinnets.python.jyplot.JyPlot;
+import eu.hoefel.ArrayToPNG;
 
 /**
  * A reading class for the *.irb file format by InfraTec, inspired by
@@ -129,6 +130,14 @@ public class IrbFile {
 						System.out.print("starting to export to text files... ");
 						image.exportImageData(String.format(filename+".img_%d.dat", i));
 						image.exportMetaData(String.format(filename+".meta_%d.json", i));
+						System.out.println("done");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+					try {
+						System.out.print("starting to dump image as PNG... ");
+						ArrayToPNG.dumpAsPng(image.getCelsiusImage(), String.format(filename+".img_%d.png", i));
 						System.out.println("done");
 					} catch (Exception e) {
 						e.printStackTrace();
