@@ -56,7 +56,6 @@ Otherwise, you can include this project as a dependency in Maven:
     <groupId>de.labathome</groupId>
     <artifactId>irb</artifactId>
     <version>1.0.1</version>
-    <packaging>jar</packaging>
 </dependency>
 ```
 
