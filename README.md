@@ -54,10 +54,10 @@ Execute the jar with the `*.irb` file as first command line argument:
 > java -jar irb-1.0.1.jar AB020300.irb
 ```
 
-It can also be run in headless mode:
+It can also be run in headless mode, where no attempt will be made to plot the image using JyPlot:
 
 ```bash
-> java -jar irb-1.0.1.jar AB020300.irb --headless
+> java -jar irb-1.0.1.jar --headless AB020300.irb
 ```
 
 This will generate two text output files and a direct PNG equivalent of the data:
