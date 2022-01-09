@@ -114,7 +114,7 @@ public class IrbFile {
 		if (args != null && args.length > 0) {
 
 			String filename = args[0];
-			bool runHeadless = false;
+			boolean runHeadless = false;
 			if(args.length > 1){
 				String headless = args[1];
 				if(headless.equals("--headless"))
