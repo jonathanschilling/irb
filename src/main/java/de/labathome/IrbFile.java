@@ -170,7 +170,7 @@ public class IrbFile {
 						plt.colorbar();
 						plt.title(String.format("image %d", i));
 						if(runHeadless){
-							plt.savefig("export_" + filename);
+							plt.savefig(filename + "_export.png");
 						} else {
 							plt.show();
 							plt.exec();
