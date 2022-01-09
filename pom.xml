@@ -32,6 +32,15 @@
 		<system>GitHub Issues</system>
 	</issueManagement>
 
+	<repositories>
+		<repository>
+			<id>aliceinnets-central</id>
+			<name>master</name>
+			<url>https://raw.github.com/aliceinnets/maven-repository/master/</url>
+			<layout>default</layout>
+		</repository>
+	</repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

@@ -3,13 +3,43 @@
 A reader in pure Java for the `*.irb` file format by InfraTec,  
 inspired by https://github.com/tomsoftware/Irbis-File-Format .
 
+This program can be used either as a Maven dependency within another program
+or as a stand-alone commandline utility.
+
+## Legal disclaimer
+
 This is a pure hobby project. No copyright infringements or similar is intended.  
 Please inform the author about possible legal issues before turning to a lawyer.
 
-## Usage
+## Building
 
-This program can be used either as a Maven dependency within another program
-or as a stand-alone commandline utility.
+1. Download and install build dependencies
+   1. JDK 1.8 (or any newer version)
+   2. Maven
+2. Build a runnable self-contained jar file:
+
+```bash
+> mvn clean package
+```
+
+The output will be at `target/irb-1.0.1.jar`.
+
+## Use as a Maven dependency
+
+You can include this project as a dependency in Maven:
+
+```xml
+<dependency>
+    <groupId>de.labathome</groupId>
+    <artifactId>irb</artifactId>
+    <version>1.0.1</version>
+</dependency>
+```
+
+The ready-to-use jar can also be directly downloaded here:
+[irb-1.0.1.jar](https://github.com/jonathanschilling/irb/releases/download/v1.0.1/irb-1.0.1.jar)
+
+## Command-line Usage
 
 Execute the jar with the `*.irb` file as first command line argument:
  
@@ -39,28 +69,12 @@ You can fix this by telling JyPlot about your Python installation by creating a 
 
 The text output files should nevertheless get created.
 
-## Building
-
-1. Make a jar:
-
-```bash
-> mvn clean package
-```
-
-The output will be at `target/irb-1.0.1.jar`.
-
-Otherwise, you can include this project as a dependency in Maven:
-
-```xml
-<dependency>
-    <groupId>de.labathome</groupId>
-    <artifactId>irb</artifactId>
-    <version>1.0.1</version>
-</dependency>
-```
-
 ## Contributers
 
  * [jonathanschilling](https://github.com/jonathanschilling)
  * [benjaminSchilling33](https://github.com/benjaminschilling33)
- 
+ * [uhoefel](https://github.com/uhoefel)
+
+## License
+
+SPDX-License-Identifier: Apache-2.0
