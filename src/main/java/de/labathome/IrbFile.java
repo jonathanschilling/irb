@@ -172,9 +172,9 @@ public class IrbFile {
 							plt.savefig("export_" + filename);
 						} else {
 							plt.show();
+							plt.exec();
 						}
 						
-						plt.exec();
 						System.out.println("done");
 					} catch (Exception e) {
 						e.printStackTrace();
