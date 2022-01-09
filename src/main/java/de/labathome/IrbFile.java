@@ -114,6 +114,15 @@ public class IrbFile {
 		if (args != null && args.length > 0) {
 
 			String filename = args[0];
+			bool runHeadless = false;
+			if(args.length > 1){
+				String headless = args[1];
+				if(headless.equals("--headless"))
+				{
+					runHeadless = true;
+				}
+			}
+			
 			try {
 				IrbFile irbFile = IrbFile.fromFile(filename);
 
@@ -159,8 +168,12 @@ public class IrbFile {
 	//					plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('nipy_spectral')");
 						plt.colorbar();
 						plt.title(String.format("image %d", i));
-
-						plt.show();
+						if(headless){
+							plt.savefig("export_" + filename);
+						} else {
+							plt.show();
+						}
+						
 						plt.exec();
 						System.out.println("done");
 					} catch (Exception e) {
@@ -174,7 +187,9 @@ public class IrbFile {
 				e.printStackTrace();
 			}
 		} else {
-			System.out.println("usage: java -jar irb.jar /path/to/image.irb");
+			System.out.println("usage: java -jar irb.jar /path/to/image.irb (options)");
+			System.out.println("options:");
+			System.out.println("	--headless: save the image to disk instead of displaying it. ");
 		}
 	}
 

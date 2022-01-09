@@ -11,6 +11,7 @@ or as a stand-alone commandline utility.
 This is a pure hobby project. No copyright infringements or similar is intended.  
 Please inform the author about possible legal issues before turning to a lawyer.
 
+
 ## Building
 
 1. Download and install build dependencies
@@ -40,6 +41,12 @@ The ready-to-use jar can also be directly downloaded here:
 [irb-1.0.1.jar](https://github.com/jonathanschilling/irb/releases/download/v1.0.1/irb-1.0.1.jar)
 
 ## Command-line Usage
+
+Run-time dependencies:
+- Python3 packages
+  - matplotlib
+    - Requires libjpeg and zlib development headers for *pillow*
+  - numpy
 
 Execute the jar with the `*.irb` file as first command line argument:
  
