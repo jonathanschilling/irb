@@ -54,6 +54,12 @@ Execute the jar with the `*.irb` file as first command line argument:
 > java -jar irb-1.0.1.jar AB020300.irb
 ```
 
+It can also be run in headless mode:
+
+```bash
+> java -jar irb-1.0.1.jar AB020300.irb --headless
+```
+
 This will generate two text output files and a direct PNG equivalent of the data:
  * `AB020300.irb.img_0.dat` contains the raw image data in degree Celsius as a two-dimensional matrix.
    Each line in the file contains the temperatures for each pixel of the corresponding line of the image.
@@ -64,8 +70,8 @@ This will generate two text output files and a direct PNG equivalent of the data
  * `AB020300.irb.meta_0.json` contains the meta-data of the image in the JSON format.
  * `AB020300.irb.img_0.png` contains a direct PNG export of the image data
    with the temperature in degree Celsius mapped to a `jet`-like colorbar.
- 
-Additionally, a direct plot of the image is tried using `JyPlot`.
+
+If not run in headless mode, a direct plot of the image is tried using `JyPlot`.
 This requires to have a Python installation with `matplotlib` and `numpy` on your `$PATH`.
 A temporary Python script file is created in a folder `PythonScript` in your home directory.
 This will be executed by the default `python` command.
