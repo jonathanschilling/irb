@@ -11,6 +11,7 @@ or as a stand-alone commandline utility.
 This is a pure hobby project. No copyright infringements or similar is intended.  
 Please inform the author about possible legal issues before turning to a lawyer.
 
+
 ## Building
 
 1. Download and install build dependencies
@@ -22,7 +23,7 @@ Please inform the author about possible legal issues before turning to a lawyer.
 > mvn clean package
 ```
 
-The output will be at `target/irb-1.0.1.jar`.
+The output will be at `target/irb-1.0.2.jar`.
 
 ## Use as a Maven dependency
 
@@ -32,19 +33,31 @@ You can include this project as a dependency in Maven:
 <dependency>
     <groupId>de.labathome</groupId>
     <artifactId>irb</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 
 The ready-to-use jar can also be directly downloaded here:
-[irb-1.0.1.jar](https://github.com/jonathanschilling/irb/releases/download/v1.0.1/irb-1.0.1.jar)
+[irb-1.0.2.jar](https://github.com/jonathanschilling/irb/releases/download/v1.0.2/irb-1.0.2.jar)
 
 ## Command-line Usage
+
+Run-time dependencies:
+- Python3 packages
+  - matplotlib
+    - Requires libjpeg and zlib development headers for *pillow*
+  - numpy
 
 Execute the jar with the `*.irb` file as first command line argument:
  
 ```bash
-> java -jar irb-1.0.1.jar AB020300.irb
+> java -jar irb-1.0.2.jar AB020300.irb
+```
+
+It can also be run in headless mode, where no attempt will be made to plot the image using JyPlot:
+
+```bash
+> java -jar irb-1.0.2.jar --headless AB020300.irb
 ```
 
 This will generate two text output files and a direct PNG equivalent of the data:
@@ -57,8 +70,8 @@ This will generate two text output files and a direct PNG equivalent of the data
  * `AB020300.irb.meta_0.json` contains the meta-data of the image in the JSON format.
  * `AB020300.irb.img_0.png` contains a direct PNG export of the image data
    with the temperature in degree Celsius mapped to a `jet`-like colorbar.
- 
-Additionally, a direct plot of the image is tried using `JyPlot`.
+
+If not run in headless mode, a direct plot of the image is tried using `JyPlot`.
 This requires to have a Python installation with `matplotlib` and `numpy` on your `$PATH`.
 A temporary Python script file is created in a folder `PythonScript` in your home directory.
 This will be executed by the default `python` command.
