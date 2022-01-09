@@ -124,6 +124,7 @@ public class IrbFile {
 			}
 			
 			try {
+				System.out.println("Processing file: " + filename);
 				IrbFile irbFile = IrbFile.fromFile(filename);
 
 				System.out.println("number of images: "+irbFile.images.size());
