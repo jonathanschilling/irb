@@ -168,7 +168,7 @@ public class IrbFile {
 	//					plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('nipy_spectral')");
 						plt.colorbar();
 						plt.title(String.format("image %d", i));
-						if(headless){
+						if(runHeadless){
 							plt.savefig("export_" + filename);
 						} else {
 							plt.show();
