@@ -23,7 +23,7 @@ Please inform the author about possible legal issues before turning to a lawyer.
 > mvn clean package
 ```
 
-The output will be at `target/irb-1.0.1.jar`.
+The output will be at `target/irb-1.0.2.jar`.
 
 ## Use as a Maven dependency
 
@@ -33,12 +33,12 @@ You can include this project as a dependency in Maven:
 <dependency>
     <groupId>de.labathome</groupId>
     <artifactId>irb</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 
 The ready-to-use jar can also be directly downloaded here:
-[irb-1.0.1.jar](https://github.com/jonathanschilling/irb/releases/download/v1.0.1/irb-1.0.1.jar)
+[irb-1.0.2.jar](https://github.com/jonathanschilling/irb/releases/download/v1.0.2/irb-1.0.2.jar)
 
 ## Command-line Usage
 
@@ -51,13 +51,13 @@ Run-time dependencies:
 Execute the jar with the `*.irb` file as first command line argument:
  
 ```bash
-> java -jar irb-1.0.1.jar AB020300.irb
+> java -jar irb-1.0.2.jar AB020300.irb
 ```
 
 It can also be run in headless mode, where no attempt will be made to plot the image using JyPlot:
 
 ```bash
-> java -jar irb-1.0.1.jar --headless AB020300.irb
+> java -jar irb-1.0.2.jar --headless AB020300.irb
 ```
 
 This will generate two text output files and a direct PNG equivalent of the data:
