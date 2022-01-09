@@ -143,8 +143,8 @@ public class IrbFile {
 					// try to export data
 					try {
 						System.out.print("starting to export to text files... ");
-						image.exportImageData(String.format(filename+".img_%d.dat", i));
-						image.exportMetaData(String.format(filename+".meta_%d.json", i));
+						image.exportImageData(String.format(filename+".img_%d.dat", imageIndex));
+						image.exportMetaData(String.format(filename+".meta_%d.json", imageIndex));
 						System.out.println("done");
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -152,7 +152,7 @@ public class IrbFile {
 
 					try {
 						System.out.print("starting to dump image as PNG... ");
-						ArrayToPNG.dumpAsPng(image.getCelsiusImage(), String.format(filename+".img_%d.png", i));
+						ArrayToPNG.dumpAsPng(image.getCelsiusImage(), String.format(filename+".img_%d.png", imageIndex));
 						System.out.println("done");
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -168,7 +168,7 @@ public class IrbFile {
 		//					plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('gist_ncar')");
 		//					plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('nipy_spectral')");
 							plt.colorbar();
-							plt.title(String.format("image %d", i));
+							plt.title(String.format("image %d", imageIndex));
 
 							plt.show();
 							plt.exec();							
