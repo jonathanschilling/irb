@@ -1,5 +1,5 @@
 /* irb
- * CLI MainClass
+ * IrbCli Class
  * SPDX-License-Identifier: Apache-2.0
  */
 
