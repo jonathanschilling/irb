@@ -18,7 +18,7 @@
 	<description>*.irb file format reader in Java</description>
 
 	<properties>
-		<app.mainClass>de.labathome.IrbFile</app.mainClass>
+		<app.mainClass>de.labathome.cli.IrbCli</app.mainClass>
 	</properties>
 
 	<url>${jonathanschilling.git.url}${project.name}</url>
