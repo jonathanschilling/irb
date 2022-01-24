@@ -4,7 +4,9 @@ A reader in pure Java for the `*.irb` file format by InfraTec,
 inspired by https://github.com/tomsoftware/Irbis-File-Format .
 
 This program can be used either as a Maven dependency within another program
-or as a stand-alone commandline utility.
+or as a stand-alone commandline utility.  
+The ready-to-use jar can be downloaded here:
+[irb-1.0.3.jar](https://github.com/jonathanschilling/irb/releases/download/v1.0.3/irb-1.0.3.jar)
 
 ## Legal disclaimer
 
@@ -36,9 +38,6 @@ You can include this project as a dependency in Maven:
     <version>1.0.3</version>
 </dependency>
 ```
-
-The ready-to-use jar can also be directly downloaded here:
-[irb-1.0.3.jar](https://github.com/jonathanschilling/irb/releases/download/v1.0.3/irb-1.0.3.jar)
 
 ## Command-line Usage
 
