@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package de.labathome;
+package de.labathome.irb;
 
 public enum IrbFileType {
 
@@ -23,7 +23,7 @@ public enum IrbFileType {
 	private String content;
 
 	public static IrbFileType fromString(String content) {
-		for (IrbFileType t: IrbFileType.values()) {
+		for (IrbFileType t : IrbFileType.values()) {
 			if (t.content.equals(content)) {
 				return t;
 			}

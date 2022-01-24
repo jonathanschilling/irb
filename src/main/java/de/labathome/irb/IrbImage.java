@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package de.labathome;
+package de.labathome.irb;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -221,7 +221,8 @@ public class IrbImage {
 		buf.position(oldPos);
 	}
 
-	private void readImageData(ByteBuffer buf, int offset, int bindataOffset, int width, int height, int paletteOffset, boolean useCompression) {
+	private void readImageData(ByteBuffer buf, int offset, int bindataOffset, int width, int height, int paletteOffset,
+			boolean useCompression) {
 
 		int dataSize = width * height;
 
@@ -251,7 +252,7 @@ public class IrbImage {
 		if (useCompression) {
 			// compression active: run-length encoding
 
-			for (int i=pixelCount; i>0; i--) {
+			for (int i = pixelCount; i > 0; i--) {
 
 				if (v2_count-- < 1) {
 					v2_count = buf.get(offset + v2_pos) - 1;
@@ -287,7 +288,7 @@ public class IrbImage {
 			}
 		} else {
 			// no compression
-			for (int i=pixelCount; i>0; i--) {
+			for (int i = pixelCount; i > 0; i--) {
 
 				v1 = buf.get(offset + v1_pos);
 				v1_pos++;
@@ -325,9 +326,9 @@ public class IrbImage {
 		maxData = Float.NEGATIVE_INFINITY;
 
 		data = new float[height][width];
-		for (int i=0; i<pixelCount; ++i) {
-			final int row = i/width;
-			final int col = i%width;
+		for (int i = 0; i < pixelCount; ++i) {
+			final int row = i / width;
+			final int col = i % width;
 			data[row][col] = matrixData[i];
 
 			minData = Math.min(minData, matrixData[i]);
@@ -345,8 +346,8 @@ public class IrbImage {
 	 */
 	public float[][] getCelsiusImage() {
 		float[][] celsiusData = new float[height][width];
-		for (int i=0; i<height; ++i) {
-			for (int j=0; j<width; ++j) {
+		for (int i = 0; i < height; ++i) {
+			for (int j = 0; j < width; ++j) {
 				celsiusData[i][j] = data[i][j] - CELSIUS_OFFSET;
 			}
 		}
@@ -360,7 +361,7 @@ public class IrbImage {
 		float[] palette = new float[256];
 
 		buf.position(offset);
-		for (int i=0; i<256; ++i) {
+		for (int i = 0; i < 256; ++i) {
 			palette[i] = buf.getFloat();
 		}
 
@@ -385,18 +386,19 @@ public class IrbImage {
 
 	/** from https://stackoverflow.com/a/23673012 */
 	private static Date fromDoubleToDateTime(double OADate) {
-	    long num = (long) ((OADate * 86400000.0) + ((OADate >= 0.0) ? 0.5 : -0.5));
-	    if (num < 0L) {
-	        num -= (num % 0x5265c00L) * 2L;
-	    }
-	    num += 0x3680b5e1fc00L;
-	    num -= 62135596800000L;
+		long num = (long) ((OADate * 86400000.0) + ((OADate >= 0.0) ? 0.5 : -0.5));
+		if (num < 0L) {
+			num -= (num % 0x5265c00L) * 2L;
+		}
+		num += 0x3680b5e1fc00L;
+		num -= 62135596800000L;
 
-	    return new Date(num);
+		return new Date(num);
 	}
 
 	/**
 	 * Export all meta-data (except the actual image data) to a JSON file.
+	 * 
 	 * @param filename file to export metadata to
 	 */
 	public void exportMetaData(String filename) {
@@ -414,15 +416,16 @@ public class IrbImage {
 
 	/**
 	 * Export image data as 2d text file.
+	 * 
 	 * @param filename file to export image data to
 	 */
 	public void exportImageData(String filename) {
-		try(BufferedWriter w = new BufferedWriter(new FileWriter(filename))) {
+		try (BufferedWriter w = new BufferedWriter(new FileWriter(filename))) {
 			float[][] celsiusData = getCelsiusImage();
 			int height = celsiusData.length;
 			int width = celsiusData[0].length;
-			for (int i=height-1; i>=0; i--) {
-				for (int j=0; j<width; ++j) {
+			for (int i = height - 1; i >= 0; i--) {
+				for (int j = 0; j < width; ++j) {
 					w.write(String.format(Locale.ENGLISH, "%8.6f ", celsiusData[i][j]));
 				}
 				w.write("\n");

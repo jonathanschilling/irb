@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package de.labathome;
+package de.labathome.irb;
 
 public enum IrbBlockType {
 

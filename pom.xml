@@ -11,14 +11,14 @@
 	</parent>
 
 	<artifactId>irb</artifactId>
-	<version>1.0.2</version>
+	<version>1.0.3</version>
 	<packaging>jar</packaging>
 
 	<name>irb</name>
 	<description>*.irb file format reader in Java</description>
 
 	<properties>
-		<app.mainClass>de.labathome.IrbFile</app.mainClass>
+		<app.mainClass>de.labathome.cli.IrbCli</app.mainClass>
 	</properties>
 
 	<url>${jonathanschilling.git.url}${project.name}</url>
@@ -56,6 +56,11 @@
 			<groupId>aliceinnets</groupId>
 			<artifactId>java-jyplot</artifactId>
 			<version>1.3.0</version>
+		</dependency>
+		<dependency>
+		  	<groupId>info.picocli</groupId>
+ 		 	<artifactId>picocli</artifactId>
+  			<version>4.6.2</version>
 		</dependency>
 	</dependencies>
 
