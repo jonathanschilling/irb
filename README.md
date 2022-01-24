@@ -23,7 +23,7 @@ Please inform the author about possible legal issues before turning to a lawyer.
 > mvn clean package
 ```
 
-The output will be at `target/irb-1.0.2.jar`.
+The output will be at `target/irb-1.0.3.jar`.
 
 ## Use as a Maven dependency
 
@@ -33,16 +33,16 @@ You can include this project as a dependency in Maven:
 <dependency>
     <groupId>de.labathome</groupId>
     <artifactId>irb</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 </dependency>
 ```
 
 The ready-to-use jar can also be directly downloaded here:
-[irb-1.0.2.jar](https://github.com/jonathanschilling/irb/releases/download/v1.0.2/irb-1.0.2.jar)
+[irb-1.0.3.jar](https://github.com/jonathanschilling/irb/releases/download/v1.0.3/irb-1.0.3.jar)
 
 ## Command-line Usage
 
-Run-time dependencies:
+Run-time dependencies for use with JyPlot:
 - Python3 packages
   - matplotlib
     - Requires libjpeg and zlib development headers for *pillow*
@@ -51,13 +51,13 @@ Run-time dependencies:
 Execute the jar with the `*.irb` file as first command line argument:
  
 ```bash
-> java -jar irb-1.0.2.jar AB020300.irb
+> java -jar irb-1.0.3.jar AB020300.irb
 ```
 
 It can also be run in headless mode, where no attempt will be made to plot the image using JyPlot:
 
 ```bash
-> java -jar irb-1.0.2.jar --headless AB020300.irb
+> java -jar irb-1.0.3.jar --headless AB020300.irb
 ```
 
 This will generate two text output files and a direct PNG equivalent of the data:
@@ -71,7 +71,7 @@ This will generate two text output files and a direct PNG equivalent of the data
  * `AB020300.irb.img_0.png` contains a direct PNG export of the image data
    with the temperature in degree Celsius mapped to a `jet`-like colorbar.
 
-If not run in headless mode, a direct plot of the image is tried using `JyPlot`.
+If not run in headless mode, a direct plot of the image is tried using JyPlot.
 This requires to have a Python installation with `matplotlib` and `numpy` on your `$PATH`.
 A temporary Python script file is created in a folder `PythonScript` in your home directory.
 This will be executed by the default `python` command.

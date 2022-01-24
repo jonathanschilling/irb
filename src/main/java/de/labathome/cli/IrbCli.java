@@ -22,15 +22,15 @@ import de.labathome.irb.IrbImage;
 //3rd Party packages that are part of this repo
 import eu.hoefel.ArrayToPNG;
 
-@Command(name = "irb", version = "irb 1.0.2", description = "Process *.irb files")
+@Command(name = "irb", version = "irb 1.0.3", description = "Process *.irb files")
 public class IrbCli implements Callable<Integer> {
-	
+
 	@Parameters(index = "0", description = "The *.irb file to read.")
 	private String filename;
-	
+
 	@Option(names = {"-h", "--headless"}, description = "Save the image to disk instead of displaying it.")
 	private boolean runHeadless;
-	
+
 	public Integer call() throws Exception {
 		try {
             System.out.println("Processing file: " + filename);
@@ -42,13 +42,11 @@ public class IrbCli implements Callable<Integer> {
             for (IrbImage image : irbFile.images) {
 
                 System.out.println("\n\nimage " + imageIndex);
-                System.out.printf("            env temp: %g °C\n",
-                        image.environmentalTemp - IrbImage.CELSIUS_OFFSET);
-                System.out.printf("           path temp: %g °C\n", image.pathTemperature - IrbImage.CELSIUS_OFFSET);
-                System.out.printf("     calib range min: %g °C\n", image.calibRangeMin - IrbImage.CELSIUS_OFFSET);
-                System.out.printf("     calib range max: %g °C\n", image.calibRangeMax - IrbImage.CELSIUS_OFFSET);
-                System.out.printf("shot range start err: %g °C\n",
-                        image.shotRangeStartErr - IrbImage.CELSIUS_OFFSET);
+                System.out.printf("            env temp: %g °C\n", image.environmentalTemp - IrbImage.CELSIUS_OFFSET);
+                System.out.printf("           path temp: %g °C\n", image.pathTemperature   - IrbImage.CELSIUS_OFFSET);
+                System.out.printf("     calib range min: %g °C\n", image.calibRangeMin     - IrbImage.CELSIUS_OFFSET);
+                System.out.printf("     calib range max: %g °C\n", image.calibRangeMax     - IrbImage.CELSIUS_OFFSET);
+                System.out.printf("shot range start err: %g °C\n", image.shotRangeStartErr - IrbImage.CELSIUS_OFFSET);
                 System.out.printf("     shot range size: %g  K\n", image.shotRangeSize);
 
                 // try to export data
@@ -98,7 +96,7 @@ public class IrbCli implements Callable<Integer> {
         }
 		return 0;
 	}
-	
+
     public static void main(String[] args) {
     	int exitCode = new CommandLine(new IrbCli()).execute(args);
         System.exit(exitCode);

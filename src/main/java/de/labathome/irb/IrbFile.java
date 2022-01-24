@@ -16,9 +16,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import aliceinnets.python.jyplot.JyPlot;
-import eu.hoefel.ArrayToPNG;
-
 /**
  * A reading class for the *.irb file format by InfraTec, inspired by
  * https://github.com/tomsoftware/Irbis-File-Format .
@@ -109,15 +106,4 @@ public class IrbFile {
 
 		return file;
 	}
-
 }
-    
-
-			     
-							
-							    
-								    
-							 
-							 
-
-						
