@@ -7,6 +7,8 @@ package de.labathome.irb;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.Locale;
@@ -16,6 +18,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 
 public class IrbImage {
+
+	protected final Logger logger = System.getLogger(IrbImage.class.getName());
 
 	private static final int FLAGS_OFFSET = 1084;
 	public static final float CELSIUS_OFFSET = 273.15F;
@@ -111,15 +115,24 @@ public class IrbImage {
 		buf.position(offset);
 
 		bytePerPixel = buf.getShort();
+		logger.log(Level.INFO, "bytePerPixel: " + bytePerPixel);
+
 		compressed = buf.getShort();
+		logger.log(Level.INFO, "compressed: " + compressed);
+
 		width = buf.getShort();
+		logger.log(Level.INFO, "width: " + width);
+
 		height = buf.getShort();
+		logger.log(Level.INFO, "height: " + height);
 
 		// don't know: always 0
-		checkIs(0, buf.getInt());
+		final int var0 = buf.getInt();
+		checkIs(0, var0);
 
 		// don't know: always 0
-		checkIs(0, buf.getShort());
+		final short var1 = buf.getShort();
+		checkIs(0, var1);
 
 		int widthM1 = buf.getShort();
 		if (width - 1 != widthM1) {
@@ -136,45 +149,65 @@ public class IrbImage {
 
 		// don't know: always 0
 		// TODO: is -32768 for VARIOCAM
-		checkIs(0, buf.getShort());
+		final short var2 = buf.getShort();
+		logger.log(Level.INFO, "var2: " + var2);
+		checkIs(0, var2);
 
 		// don't know: always 0
-		checkIs(0, buf.getShort());
+		final short var3 = buf.getShort();
+		checkIs(0, var3);
 
 		emissivity = buf.getFloat();
+		logger.log(Level.INFO, "emissivity: " + emissivity);
+
 		distance = buf.getFloat();
+		logger.log(Level.INFO, "distance: " + distance);
+
 		environmentalTemp = buf.getFloat();
+		logger.log(Level.INFO, "environmentalTemp: " + environmentalTemp);
 
 		// don't know: always 0
-		checkIs(0, buf.getShort());
+		final short var4 = buf.getShort();
+		checkIs(0, var4);
 
 		// don't know: always 0
-		// TODO: is -32768 for VARIOCAM
-		checkIs(0, buf.getShort());
+		// TODO: is -32768 for VARIOCAM, oSaveIRB (from VARIOCAM_HD)
+		final short var5 = buf.getShort();
+		logger.log(Level.INFO, "var5: " + var5);
+		checkIs(0, var5);
 
 		pathTemperature = buf.getFloat();
+		logger.log(Level.INFO, "pathTemperature: " + pathTemperature);
 
 		// don't know: always 0x65
 		// TODO: is 0 for VARIOCAM
-		checkIs(0x65, buf.getShort());
+		final short var6 = buf.getShort();
+		checkIs(0x65, var6);
 
 		// don't know: always 0
 		// TODO: is 16256 for VARIOCAM
-		checkIs(0, buf.getShort());
+		final short var7 = buf.getShort();
+		logger.log(Level.INFO, "var7: " + var7);
+		checkIs(0, var7);
 
 		centerWavelength = buf.getFloat();
+		logger.log(Level.INFO, "centerWavelength: " + centerWavelength);
 
 		// don't know: always 0
-		checkIs(0, buf.getShort());
+		final short var8 = buf.getShort();
+		checkIs(0, var8);
 
 		// don't know: always 0x4080
-		checkIs(0x4080, buf.getShort());
+		final short var9 = buf.getShort();
+		checkIs(0x4080, var9);
 
 		// don't know: always 0x9
-		checkIs(0x9, buf.getShort());
+		final short var10 = buf.getShort();
+		checkIs(0x9, var10);
 
 		// don't know: always 0x101
-		checkIs(0x101, buf.getShort());
+		final short var11 = buf.getShort();
+		checkIs(0x101, var11);
 
 		if (width > 10000 || height > 10000) {
 			System.out.printf("error: width (%d) or height (%d) out-of-range!\n", width, height);
@@ -187,9 +220,10 @@ public class IrbImage {
 		readImageFlags(buf, flagsPosition);
 
 		// TODO: is this IrbHeaderBlock.headerSize ???
-		int bindataOffset = 0x6c0;
+		int bindataOffset = 0x6c0; // 1728 ???
 		int paletteOffset = 60;
 		boolean useCompression = (compressed != 0);
+		logger.log(Level.INFO, "use compression? " + useCompression);
 		readImageData(buf, offset, bindataOffset, width, height, paletteOffset, useCompression);
 
 		// restore old position
@@ -221,8 +255,7 @@ public class IrbImage {
 		buf.position(oldPos);
 	}
 
-	private void readImageData(ByteBuffer buf, int offset, int bindataOffset, int width, int height, int paletteOffset,
-			boolean useCompression) {
+	private void readImageData(ByteBuffer buf, int offset, int bindataOffset, int width, int height, int paletteOffset, boolean useCompression) {
 
 		int dataSize = width * height;
 
@@ -255,12 +288,16 @@ public class IrbImage {
 			for (int i = pixelCount; i > 0; i--) {
 
 				if (v2_count-- < 1) {
+					// happens on first call and then again after v2_count (was read) pixels(?) have passed
+					// --> run-length encoding ???
+
 					v2_count = buf.get(offset + v2_pos) - 1;
 					v2_pos++;
 					v2 = buf.get(offset + v2_pos);
 					v2_pos++;
 
 					if (v2 < 0) {
+						// handle reading uint8_t
 						v2 += 256;
 					}
 				}
@@ -269,6 +306,7 @@ public class IrbImage {
 				v1_pos++;
 
 				if (v1 < 0) {
+					// handle reading uint8_t
 					v1 += 256;
 				}
 
@@ -296,10 +334,12 @@ public class IrbImage {
 				v1_pos++;
 
 				if (v1 < 0) {
+					// handle reading uint8_t
 					v1 += 256;
 				}
 
 				if (v2 < 0) {
+					// handle reading uint8_t
 					v2 += 256;
 				}
 
@@ -398,7 +438,7 @@ public class IrbImage {
 
 	/**
 	 * Export all meta-data (except the actual image data) to a JSON file.
-	 * 
+	 *
 	 * @param filename file to export metadata to
 	 */
 	public void exportMetaData(String filename) {
@@ -416,7 +456,7 @@ public class IrbImage {
 
 	/**
 	 * Export image data as 2d text file.
-	 * 
+	 *
 	 * @param filename file to export image data to
 	 */
 	public void exportImageData(String filename) {

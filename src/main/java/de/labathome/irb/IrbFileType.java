@@ -14,7 +14,10 @@ public enum IrbFileType {
 	SEQUENCE("IRBIS 3\0"),
 
 	/** specific camera model; identified by "VARIOCAM" */
-	VARIOCAM("VARIOCAM");
+	VARIOCAM("VARIOCAM"),
+
+	/** what is this ??? */
+	O_SAVE_IRB("oSaveIRB");
 
 	private IrbFileType(String content) {
 		this.content = content;

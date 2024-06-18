@@ -5,9 +5,13 @@
 
 package de.labathome.irb;
 
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.ByteBuffer;
 
 public class IrbHeaderBlock {
+
+	protected final Logger logger = System.getLogger(IrbHeaderBlock.class.getName());
 
 	public IrbBlockType blockType;
 	public int dword2;
@@ -26,16 +30,24 @@ public class IrbHeaderBlock {
 
 		// read header
 
-		blockType = IrbBlockType.fromInt(buf.getInt());
+		final int blockTypeInt = buf.getInt();
+		logger.log(Level.INFO, String.format("block type: %d", blockTypeInt));
+		blockType = IrbBlockType.fromInt(blockTypeInt);
 		System.out.printf("found block: %s\n", blockType);
 
+		// always 100 ???
 		dword2 = buf.getInt();
+		logger.log(Level.INFO, String.format("dword2: %d", dword2));
+
 		frameIndex = buf.getInt();
+		logger.log(Level.INFO, String.format("frame index: %d", frameIndex));
 
 		// starts at 0
 		offset = buf.getInt();
+		logger.log(Level.INFO, String.format("offset: %d", offset));
 
 		size = buf.getInt();
+		logger.log(Level.INFO, String.format("  size: %d", size));
 
 		// head has fixed size of 0x6C0
 		// but check against headerSize...
@@ -43,14 +55,22 @@ public class IrbHeaderBlock {
 		if (headerSize > size) {
 			headerSize = size;
 		}
+		logger.log(Level.INFO, String.format("headerSize: %d", headerSize));
 
 		headerOffset = 0;
 
 		imageOffset = headerSize;
 		imageSize = size - imageOffset;
+		logger.log(Level.INFO, String.format("imageOffset: %d", imageOffset));
+		logger.log(Level.INFO, String.format("imageSize  : %d", imageSize));
 
 		dword6 = buf.getInt();
+		logger.log(Level.INFO, String.format("dword6: %d", dword6));
+
 		dword7 = buf.getInt();
+		logger.log(Level.INFO, String.format("dword7: %d", dword7));
+
 		dword8 = buf.getInt();
+		logger.log(Level.INFO, String.format("dword8: %d", dword8));
 	}
 }

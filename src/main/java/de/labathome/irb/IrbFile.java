@@ -8,6 +8,8 @@ package de.labathome.irb;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
@@ -28,6 +30,8 @@ import java.util.List;
  * @author Benjamin Schilling (benjamin.schilling33@gmail.com)
  */
 public class IrbFile {
+
+	protected final Logger logger = System.getLogger(IrbFile.class.getName());
 
 	/** \ff I R B \0 */
 	private static final byte[] MAGIC_ID = { (byte) 0xff, (byte) 0x49, (byte) 0x52, (byte) 0x42, (byte) 0x0 };
@@ -51,6 +55,7 @@ public class IrbFile {
 		// parse magic number ID
 		final byte[] magicBytes = new byte[5];
 		buf.get(magicBytes);
+		logger.log(Level.INFO, "magic bytes: " + Arrays.toString(magicBytes));
 		if (!Arrays.equals(magicBytes, MAGIC_ID)) {
 			throw new RuntimeException("first 5 magic bytes invalid");
 		}
@@ -58,10 +63,15 @@ public class IrbFile {
 		// read file type
 		final byte[] fileTypeBytes = new byte[8];
 		buf.get(fileTypeBytes);
-		fileType = IrbFileType.fromString(new String(fileTypeBytes));
+		final String fileTypeString = new String(fileTypeBytes);
+		logger.log(Level.INFO, "file type bytes: " + Arrays.toString(fileTypeBytes) + "; as String: " + fileTypeString);
+		fileType = IrbFileType.fromString(fileTypeString);
+		logger.log(Level.INFO, "file type: " + fileType);
 
 		// second file type identifier; gets ignored
 		buf.get(fileTypeBytes);
+		final String fileTypeString2 = new String(fileTypeBytes);
+		logger.log(Level.INFO, "2nd file type bytes: " + Arrays.toString(fileTypeBytes) + "; as String: " + fileTypeString2);
 
 		// NOTE: in irbis-file-format, the routines are named readIntBE,
 		// although they actually read little endian!
@@ -69,6 +79,7 @@ public class IrbFile {
 		flag1 = buf.getInt();
 		blockOffset = buf.getInt();
 		blockCount = buf.getInt();
+		logger.log(Level.INFO, String.format("block offset=%d, block count=%d", blockOffset, blockCount));
 
 		// read header blocks
 		headerBlocks = new LinkedList<>();
@@ -81,11 +92,16 @@ public class IrbFile {
 		// read actual image data
 		images = new LinkedList<>();
 		for (IrbHeaderBlock block : headerBlocks) {
+			logger.log(Level.INFO, "starting to read block of type " + block.blockType + " at offset " + block.offset + " of size " + block.size);
 			if (block.blockType == IrbBlockType.IMAGE) {
 				IrbImage image = new IrbImage(buf, block.offset, block.size);
 				images.add(image);
 			}
 		}
+
+		final int size = 0; // seems to not be used ??
+		IrbImage image = new IrbImage(buf, 480, size);
+		images.add(image);
 	}
 
 	public IrbFileType fileType() {
