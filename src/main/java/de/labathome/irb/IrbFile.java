@@ -48,10 +48,14 @@ public class IrbFile {
 	public List<IrbImage> images;
 
 	public IrbFile(ByteBuffer buf) {
-		parseHeader(buf);
+		this(buf, false);
 	}
 
-	private void parseHeader(ByteBuffer buf) {
+	public IrbFile(ByteBuffer buf, boolean forceReadOneImageAfterHeaderBlocks) {
+		parseHeader(buf, forceReadOneImageAfterHeaderBlocks);
+	}
+
+	private void parseHeader(ByteBuffer buf, boolean forceReadOneImageAfterHeaderBlocks) {
 		// parse magic number ID
 		final byte[] magicBytes = new byte[5];
 		buf.get(magicBytes);
@@ -99,9 +103,28 @@ public class IrbFile {
 			}
 		}
 
-		final int size = 0; // seems to not be used ??
-		IrbImage image = new IrbImage(buf, 480, size);
-		images.add(image);
+		if (headerBlocks.size() == 0) {
+			return;
+		}
+
+		IrbHeaderBlock lastBlock = headerBlocks.get(headerBlocks.size() - 1);
+		if (fileType == IrbFileType.O_SAVE_IRB && lastBlock.blockType == IrbBlockType.HEADER) {
+			final int dummySize = 0; //not actually needed...
+			IrbImage image = new IrbImage(buf, lastBlock.offset + lastBlock.size, dummySize);
+			images.add(image);
+		}
+
+		if (forceReadOneImageAfterHeaderBlocks) {
+			final int dummySize = 0; //not actually needed...
+			//IrbImage image = new IrbImage(buf, buf.position() + 192, dummySize);
+
+			buf.position(616608 + 192);
+
+			System.out.println("start reading 2nd actual image data at " + buf.position());
+
+			IrbImage image = new IrbImage(buf, buf.position(), dummySize);
+			images.add(image);
+		}
 	}
 
 	public IrbFileType fileType() {
@@ -117,6 +140,13 @@ public class IrbFile {
 		MappedByteBuffer buf = memoryFile.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, memoryFile.length());
 
 		IrbFile file = new IrbFile(buf);
+
+		if (file.fileType == IrbFileType.O_SAVE_IRB) {
+			buf.position(616608);
+
+			System.out.println("starting to read 2nd IRB file at " + buf.position());
+			IrbFile file2 = new IrbFile(buf, true);
+		}
 
 		memoryFile.close();
 

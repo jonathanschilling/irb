@@ -17,6 +17,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 
+import aliceinnets.python.jyplot.JyPlot;
+
 public class IrbImage {
 
 	protected final Logger logger = System.getLogger(IrbImage.class.getName());
@@ -62,6 +64,9 @@ public class IrbImage {
 
 	@Expose(serialize = true)
 	public String deviceSerial;
+
+	@Expose(serialize = true)
+	public String opticsSerial;
 
 	@Expose(serialize = true)
 	public String optics;
@@ -111,6 +116,8 @@ public class IrbImage {
 		// save current buffer position
 		final int oldPos = buf.position();
 
+		logger.log(Level.INFO, "reading IrbImage starting at offset " + offset);
+
 		// read image data
 		buf.position(offset);
 
@@ -130,25 +137,28 @@ public class IrbImage {
 		final int var0 = buf.getInt();
 		checkIs(0, var0);
 
-		// don't know: always 0
+		// don't know: always 0 --> index of first valid pixel column --> ROI ???
 		final short var1 = buf.getShort();
 		checkIs(0, var1);
 
+		// --> index of last valid pixel column --> ROI ???
 		int widthM1 = buf.getShort();
 		if (width - 1 != widthM1) {
 			System.out.printf("width-1 != widthM1 (%d) ???\n", widthM1);
 		}
 
-		// don't know: always 0
-		checkIs(0, buf.getShort());
+		// don't know: always 0 -> index of first valid pixel row --> ROI ???
+		final short var1a = buf.getShort();
+		checkIs(0, var1a);
 
+		// --> index of last valid pixel row --> ROI ???
 		int heightM1 = buf.getShort();
 		if (height - 1 != heightM1) {
 			System.out.printf("height-1 != heightM1 (%d) ???\n", heightM1);
 		}
 
 		// don't know: always 0
-		// TODO: is -32768 for VARIOCAM
+		// TODO: is -32768 for VARIOCAM, but 0 for oSaveIRB
 		final short var2 = buf.getShort();
 		logger.log(Level.INFO, "var2: " + var2);
 		checkIs(0, var2);
@@ -172,6 +182,7 @@ public class IrbImage {
 
 		// don't know: always 0
 		// TODO: is -32768 for VARIOCAM, oSaveIRB (from VARIOCAM_HD)
+		// --> 0x8000 as unsigned short ???
 		final short var5 = buf.getShort();
 		logger.log(Level.INFO, "var5: " + var5);
 		checkIs(0, var5);
@@ -179,7 +190,7 @@ public class IrbImage {
 		pathTemperature = buf.getFloat();
 		logger.log(Level.INFO, "pathTemperature: " + pathTemperature);
 
-		// don't know: always 0x65
+		// don't know: always 0x65 --> ASCII "e"
 		// TODO: is 0 for VARIOCAM
 		final short var6 = buf.getShort();
 		checkIs(0x65, var6);
@@ -198,6 +209,7 @@ public class IrbImage {
 		checkIs(0, var8);
 
 		// don't know: always 0x4080
+		// -> could be two separate bytes ???
 		final short var9 = buf.getShort();
 		checkIs(0x4080, var9);
 
@@ -206,6 +218,7 @@ public class IrbImage {
 		checkIs(0x9, var10);
 
 		// don't know: always 0x101
+		// -> could be two bytes: 1 and 1 ?
 		final short var11 = buf.getShort();
 		checkIs(0x101, var11);
 
@@ -216,7 +229,10 @@ public class IrbImage {
 			return;
 		}
 
-		final int flagsPosition = offset + FLAGS_OFFSET;
+		int headerLength = buf.position() - offset;
+		logger.log(Level.INFO, "header length so far is " + headerLength); // 60 bytes
+
+		final int flagsPosition = offset + FLAGS_OFFSET; // offset + 1084
 		readImageFlags(buf, flagsPosition);
 
 		// TODO: is this IrbHeaderBlock.headerSize ???
@@ -238,23 +254,37 @@ public class IrbImage {
 		calibRangeMax = buf.getFloat(position + 96);
 
 		device = readNullTerminatedString(buf, position + 142, 12);
-		deviceSerial = readNullTerminatedString(buf, position + 450, 16); // was: 186
+
+		opticsSerial = readNullTerminatedString(buf, position + 186, 16);
 		optics = readNullTerminatedString(buf, position + 202, 32);
 		opticsResolution = readNullTerminatedString(buf, position + 234, 32);
-		opticsText = readNullTerminatedString(buf, position + 554, 48);
+
+		deviceSerial = readNullTerminatedString(buf, position + 450, 16);
 
 		shotRangeStartErr = buf.getFloat(position + 532);
 		shotRangeSize = buf.getFloat(position + 536);
 
 		timestampRaw = buf.getDouble(position + 540);
+		timestamp = fromDoubleToDateTime(timestampRaw);
+
 		timestampMillisecond = buf.getInt(position + 548);
 
-		timestamp = fromDoubleToDateTime(timestampRaw);
+		opticsText = readNullTerminatedString(buf, position + 554, 48);
 
 		// restore old position
 		buf.position(oldPos);
 	}
 
+	/**
+	 *
+	 * @param buf
+	 * @param offset - location where full image data block (incl header) starts
+	 * @param bindataOffset 0x6c0 == 1728
+	 * @param width 640 mostly
+	 * @param height 480 mostly
+	 * @param paletteOffset fixed at 60
+	 * @param useCompression true or false
+	 */
 	private void readImageData(ByteBuffer buf, int offset, int bindataOffset, int width, int height, int paletteOffset, boolean useCompression) {
 
 		int dataSize = width * height;
@@ -318,6 +348,7 @@ public class IrbImage {
 				// linear interpolation between neighboring palette entries
 				v = palette[v2 + 1] * f + palette[v2] * (1.0F - f);
 				if (v < 0.0F) {
+					// negative Kelvin temperatures are forbidden?
 					v = 0.0F; // or 255 ...
 				}
 
@@ -325,32 +356,49 @@ public class IrbImage {
 				matrixDataPos++;
 			}
 		} else {
+			logger.log(Level.INFO, "start reading image at offset " + (offset + v1_pos));
+
 			// no compression
 			for (int i = pixelCount; i > 0; i--) {
 
+				// v1 is used to compute f, which represents a fraction in [0, 1[
 				v1 = buf.get(offset + v1_pos);
 				v1_pos++;
+
+				// v2 seems to be the index of the current interval in the palette
+				// -> for a fixed palette, we thus expect every second byte of an image to be the same value
 				v2 = buf.get(offset + v1_pos);
 				v1_pos++;
 
 				if (v1 < 0) {
-					// handle reading uint8_t
+					// handle reading uint8_t -> make v1 be in range 0 ... 255
 					v1 += 256;
 				}
 
 				if (v2 < 0) {
-					// handle reading uint8_t
+					// handle reading uint8_t -> make v2 be in range 0 ... 255
 					v2 += 256;
 				}
 
+				if (i == pixelCount) {
+					System.out.println("v2 = " + v2); // 0x72 == 114
+				}
+
+				// keep track of min/max occuring values for v1
+				// --> seems to actually use full range 0 to 255!
+				// --> and then palette entry is used to re-scale to actual temperature range...?
 				v1Min = Math.min(v1Min, v1);
 				v1Max = Math.max(v1Max, v1);
 
+				// fraction between 0 and 1
+				// specifically, v1 can be 0 ... 255
+				// --> i / 256 goes from 0 to just below 1
 				f = v1 / 256.0F;
 
 				// linear interpolation between neighboring palette entries
 				v = palette[v2 + 1] * f + palette[v2] * (1.0F - f);
 				if (v < 0.0F) {
+					// negative Kelvin temperatures are forbidden?
 					v = 0.0F; // or 255 ...
 				}
 
@@ -394,6 +442,12 @@ public class IrbImage {
 		return celsiusData;
 	}
 
+	/**
+	 *
+	 * @param buf
+	 * @param offset `offset` of image start, + paletteOffset == 60
+	 * @return
+	 */
 	private float[] readPalette(ByteBuffer buf, int offset) {
 		// save current buffer position
 		final int oldPos = buf.position();
