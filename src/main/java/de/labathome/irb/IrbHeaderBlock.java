@@ -27,27 +27,29 @@ public class IrbHeaderBlock {
 	public int imageSize;
 
 	public IrbHeaderBlock(ByteBuffer buf) {
+		readIrbHeader(buf);
+	}
 
-		// read header
+	protected void readIrbHeader(ByteBuffer buf) {
 
 		final int blockTypeInt = buf.getInt();
-		logger.log(Level.INFO, String.format("block type: %d", blockTypeInt));
+		logger.log(Level.DEBUG, String.format("block type: %d", blockTypeInt));
 		blockType = IrbBlockType.fromInt(blockTypeInt);
 		System.out.printf("found block: %s\n", blockType);
 
 		// always 100 ???
 		dword2 = buf.getInt();
-		logger.log(Level.INFO, String.format("dword2: %d", dword2));
+		logger.log(Level.DEBUG, String.format("dword2: %d", dword2));
 
 		frameIndex = buf.getInt();
-		logger.log(Level.INFO, String.format("frame index: %d", frameIndex));
+		logger.log(Level.DEBUG, String.format("frame index: %d", frameIndex));
 
 		// starts at 0
 		offset = buf.getInt();
-		logger.log(Level.INFO, String.format("offset: %d", offset));
+		logger.log(Level.DEBUG, String.format("offset: %d", offset));
 
 		size = buf.getInt();
-		logger.log(Level.INFO, String.format("  size: %d", size));
+		logger.log(Level.DEBUG, String.format("  size: %d", size));
 
 		// head has fixed size of 0x6C0
 		// but check against headerSize...
@@ -55,22 +57,22 @@ public class IrbHeaderBlock {
 		if (headerSize > size) {
 			headerSize = size;
 		}
-		logger.log(Level.INFO, String.format("headerSize: %d", headerSize));
+		logger.log(Level.DEBUG, String.format("headerSize: %d", headerSize));
 
 		headerOffset = 0;
 
 		imageOffset = headerSize;
 		imageSize = size - imageOffset;
-		logger.log(Level.INFO, String.format("imageOffset: %d", imageOffset));
-		logger.log(Level.INFO, String.format("imageSize  : %d", imageSize));
+		logger.log(Level.DEBUG, String.format("imageOffset: %d", imageOffset));
+		logger.log(Level.DEBUG, String.format("imageSize  : %d", imageSize));
 
 		dword6 = buf.getInt();
-		logger.log(Level.INFO, String.format("dword6: %d", dword6));
+		logger.log(Level.DEBUG, String.format("dword6: %d", dword6));
 
 		dword7 = buf.getInt();
-		logger.log(Level.INFO, String.format("dword7: %d", dword7));
+		logger.log(Level.DEBUG, String.format("dword7: %d", dword7));
 
 		dword8 = buf.getInt();
-		logger.log(Level.INFO, String.format("dword8: %d", dword8));
+		logger.log(Level.DEBUG, String.format("dword8: %d", dword8));
 	}
 }
