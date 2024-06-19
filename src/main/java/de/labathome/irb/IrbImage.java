@@ -123,22 +123,30 @@ public class IrbImage {
 
 		// read image data
 		buf.position(offset);
-		readImageHeader(buf);
+		readImageHeader(buf); // 60 bytes fixed
+		// at +60 bytes
 
-		final int flagsPosition = offset + FLAGS_OFFSET; // offset + 1084
+		int paletteOffset = 60; // ha, a match!
+		readPalette(buf, offset + paletteOffset); // 1024 bytes
+		// now at +60 + +1024 == +1084 bytes
+
+		final int flagsPosition = offset + FLAGS_OFFSET; // offset + 1084 -> ha, a match!
 		readImageFlags(buf, flagsPosition);
 
 		// TODO: is this IrbHeaderBlock.headerSize ???
 		int bindataOffset = 0x6c0; // 1728 ???
-		int paletteOffset = 60;
 		boolean useCompression = (compressed != 0);
 		logger.log(Level.DEBUG, "use compression? " + useCompression);
-		readImageData(buf, offset, bindataOffset, width, height, paletteOffset, useCompression);
+		readImageData(buf, offset, bindataOffset, width, height, useCompression);
 
 		// restore old position
 		buf.position(oldPos);
 	}
 
+	/**
+	 * Read a fixed-size IrbImage header of length 60 bytes.
+	 * @param buf
+	 */
 	protected void readImageHeader(ByteBuffer buf) {
 
 		final int initialPosition = buf.position();
@@ -204,7 +212,7 @@ public class IrbImage {
 
 		// don't know: always 0
 		// TODO: is -32768 for VARIOCAM, oSaveIRB (from VARIOCAM_HD)
-		// --> 0x8000 as unsigned short ???
+		// --> 0x8000 as unsigned short ??? bit field ???
 		final short var5 = buf.getShort();
 		logger.log(Level.DEBUG, "var5: " + var5);
 		checkIs(0, var5);
@@ -218,7 +226,7 @@ public class IrbImage {
 		checkIs(0x65, var6);
 
 		// don't know: always 0
-		// TODO: is 16256 for VARIOCAM
+		// TODO: is 16256 for VARIOCAM ??? bit field ???
 		final short var7 = buf.getShort();
 		logger.log(Level.DEBUG, "var7: " + var7);
 		checkIs(0, var7);
@@ -230,8 +238,8 @@ public class IrbImage {
 		final short var8 = buf.getShort();
 		checkIs(0, var8);
 
-		// don't know: always 0x4080
-		// -> could be two separate bytes ???
+		// don't know: always 0x4080 ???
+		// -> could be two separate bytes ??? bit field ???
 		final short var9 = buf.getShort();
 		checkIs(0x4080, var9);
 
@@ -253,8 +261,6 @@ public class IrbImage {
 
 		int headerLength = buf.position() - initialPosition;
 		System.out.printf("header length so far is %d\n", headerLength); // 60 bytes
-
-
 	}
 
 	private void readImageFlags(ByteBuffer buf, int position) {
@@ -296,7 +302,7 @@ public class IrbImage {
 	 * @param paletteOffset fixed at 60
 	 * @param useCompression true or false
 	 */
-	private void readImageData(ByteBuffer buf, int offset, int bindataOffset, int width, int height, int paletteOffset, boolean useCompression) {
+	private void readImageData(ByteBuffer buf, int offset, int bindataOffset, int width, int height, boolean useCompression) {
 
 		int dataSize = width * height;
 
@@ -312,8 +318,6 @@ public class IrbImage {
 
 		int v1 = 0;
 		int v2 = 0;
-
-		palette = readPalette(buf, offset + paletteOffset);
 
 		int v2_count = 0;
 		float v = 0.0F;
@@ -454,16 +458,17 @@ public class IrbImage {
 	}
 
 	/**
-	 *
+	 * Read a fixed-size palette: 256 `float`s of 4 byte each
+	 * --> total length is 1024 bytes
 	 * @param buf
 	 * @param offset `offset` of image start, + paletteOffset == 60
 	 * @return
 	 */
-	private float[] readPalette(ByteBuffer buf, int offset) {
+	private void readPalette(ByteBuffer buf, int offset) {
 		// save current buffer position
 		final int oldPos = buf.position();
 
-		float[] palette = new float[256];
+		palette = new float[256];
 
 		buf.position(offset);
 		for (int i = 0; i < 256; ++i) {
@@ -472,8 +477,6 @@ public class IrbImage {
 
 		// restore old position
 		buf.position(oldPos);
-
-		return palette;
 	}
 
 	private static void checkIs(int expected, int val) {

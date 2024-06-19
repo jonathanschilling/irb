@@ -60,26 +60,26 @@ public class IrbFile {
 			if (block.blockType != IrbBlockType.EMPTY) {
 				System.out.println("reading contents of block of type "
 						+ block.blockType + " at offset " + block.offset + " of size " + block.size);
-			}
 
-			if (block.blockType == IrbBlockType.IMAGE) {
-				IrbImage image = new IrbImage(buf, block.offset, block.size);
-				images.add(image);
+				if (block.blockType == IrbBlockType.IMAGE) {
+					IrbImage image = new IrbImage(buf, block.offset, block.size);
+					images.add(image);
+				} else {
+					// just read past the whatever block...
+					byte[] dummy = new byte[block.size];
+					buf.get(dummy);
+
+					System.out.printf("read dummy %d bytes; now at position %d\n", block.size, buf.position());
+				}
 			} else {
-				// just read past the whatever block...
-				byte[] dummy = new byte[block.size];
-				buf.get(dummy);
-
-				System.out.printf("read dummy %d bytes; now at position %d\n", block.size, buf.position());
+				System.out.println("ignore EMPTY header block");
 			}
 		}
 
-//		if (headerBlocks.size() == 0) {
-//			return;
-//		}
-//
-//		IrbHeaderBlock lastBlock = headerBlocks.get(headerBlocks.size() - 1);
 		if (fileType == IrbFileType.O_SAVE_IRB) {
+			// expect a single "front matter"/"preview"/"thumbnail" image to be present,
+			// without it being mentioned/announced with a corresponding header block
+
 			final int dummySize = 0; //not actually needed...
 			IrbImage image = new IrbImage(buf, buf.position(), dummySize);
 			images.add(image);
@@ -98,6 +98,12 @@ public class IrbFile {
 //		}
 	}
 
+	/**
+	 * fixed 64 bytes of global file header,
+	 * then 32 bytes for each of the `IrbHeaderBlock`s immediately after the global header
+	 * @param buf
+	 * @param forceReadOneImageAfterHeaderBlocks
+	 */
 	private void parseHeader(ByteBuffer buf, boolean forceReadOneImageAfterHeaderBlocks) {
 
 		final int initialPos = buf.position();
@@ -129,7 +135,7 @@ public class IrbFile {
 		flag1 = buf.getInt();
 		blockOffset = buf.getInt();
 		blockCount = buf.getInt();
-		logger.log(Level.DEBUG, String.format("block offset=%d, block count=%d", blockOffset, blockCount));
+		System.out.printf("block offset=%d, block count=%d\n", blockOffset, blockCount);
 
 //		System.out.println("size of header, fixed part: " + (buf.position() - initialPos));
 		if (buf.position() - initialPos != 33) {
@@ -141,18 +147,18 @@ public class IrbFile {
 		// read header blocks
 		headerBlocks = new LinkedList<>();
 		buf.position(initialPos + blockOffset);
-		int sizeOfAllHeaderBlocks = 0;
+		int totalAppendedDataSize = 0;
 		for (int i = 0; i < blockCount; ++i) {
 			System.out.printf("starting to read block %d at position %d\n", i, buf.position());
 			IrbHeaderBlock headerBlock = new IrbHeaderBlock(buf);
 			headerBlocks.add(headerBlock);
 			System.out.println("  offset parameter in header block is " + headerBlock.offset);
 			System.out.println("  size   parameter in header block is " + headerBlock.size);
-			sizeOfAllHeaderBlocks += headerBlock.size;
+			totalAppendedDataSize += headerBlock.size;
 		}
 
-		final int endOfHeaderBlocks = initialPos + blockOffset + sizeOfAllHeaderBlocks;
-		System.out.println("end of header blocks at " + endOfHeaderBlocks + " pos=" + buf.position());
+		System.out.println("end of header blocks at pos = " + buf.position());
+		System.out.println("total size of appended data: " + totalAppendedDataSize);
 	}
 
 	public IrbFileType fileType() {

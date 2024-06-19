@@ -9,6 +9,10 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.ByteBuffer;
 
+/**
+ * Defines later data blocks to be read, which is associated with each of these header blocks.
+ * length: 32 byte
+ */
 public class IrbHeaderBlock {
 
 	protected final Logger logger = System.getLogger(IrbHeaderBlock.class.getName());
@@ -40,6 +44,7 @@ public class IrbHeaderBlock {
 		System.out.printf("  found block: %s\n", blockType);
 
 		// always 100 ???
+		// but is 101 for appended VARIOCAM IMAGE and TEXT_INFO?
 		dword2 = buf.getInt();
 		logger.log(Level.DEBUG, String.format("dword2: %d", dword2));
 
