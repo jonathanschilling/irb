@@ -1,0 +1,143 @@
+233.14999389648 -- - 40degC
+393.14999389648 -- +120degC
+
+would imply image flags to start at 1564 bytes
+
+- assume calibRangeMin is at byte 1656
+- that is at position + 92
+- hence position must be 1656 - 92 = 1564
+- image flags are read with FLAGS_OFFSET = 1084
+- hence buffer pos before reading image flags has to be at
+  1564 - 1084 = 480
+- offset in last HEADER is 416
+- 416 + 64 == 480 !!!
+
+- can read 1 image just after header has passed (start at offset 480)
+- size is 640x480 == 307_200 pixels
+- bytes per pixel: 2 --> 614_400 bytes per frame
+
+- 4000 images with that size: 2_457_600_000 bytes
+- but video file is only 1.3GB large !!!
+- only store difference to previous image???
+
+- try reading another image starting at 2208
+- every second byte after that is 0x72 -> could be v2 !!!
+
+- 1280 bytes for a single line of 640 pixels
+--> 1280 x 480 bytes per image data block
+ 1280 x 480 = 614_400 bytes
+--> end of image block should be at 2208 + 614_400 = 616608
+
+
+- first image starts at 2208
+- that reads bytes from offset + v1_pos
+- v1_pos starts out at bindataOffset == 1728
+- hence, offset + v1_pos == 2208 --> offset == 2208 - 1728 = 480
+
+- guess: next image starts (with full header) at 620704
+ - with 1 byte per pixel!
+
+
+IrbImage structure:
+1. initialized with `offset`
+ - from that offset, read all members in the constructor of IrbImage
+  - bytesPerPixel (short)
+  - compressed flag (short)
+  - width (short)
+  - height (short)
+  - ... var11 (short)
+ - at 60 bytes after `offset` after having read header
+   --> could be that palette follows next!
+
+--- actually seem to have palette here now: 1024 bytes
+ - palette ends at 1084 bytes !!!
+
+2. readImageFlags with position = `offset` + 1084
+ - calibRangeMin = float at position+92 == offset + 1176
+ - calibRangeMax = float at position+96 == offset + 1180
+ - device string, zero-terminated, 12 bytes length, at position+142 = offset+1226
+    - "VARIOCAM_HD\0"
+    - ca 2nd image: 618_026 -- offset would be at 618_026 - 1226 = 616800 --> block of 00 before that (zero-padded???)
+ - ...
+ - probably goes until offset 1728 --> 1728 - 1084 = 644 bytes
+
+3. readImageData with `offset`, `bindataOffset`=1728, `paletteOffset`=60 
+ - read palette at `offset` + `paletteOffset`=60
+  - 256 x `float` -- each has 4 bytes -- 1024 bytes
+  - then 60 + 1024 --> at 1084 bytes after image start `offset` !!!
+ - then read actual image data (only consider uncompressed for now)
+  - initialize v1_pos with bindataOffset = 1728
+  - and read 2 bytes per pixel == 614_400 for 640 x 480
+
+------------------
+RECAP so far:
+* image blocks start at 480 (general header blocks and whatnot)
+* each image block has size of 616_320 bytes ???
+  * starts with 60 bytes of IrbImage header
+  * 1024 bytes of palette -> 60 to 1084
+  * 644 bytes of image meta-data: 1084 to 1728
+  * 614_400 bytes of image raw-data: 1728 to 616_128 rel to image start
+  * 192 bytes remaining? -> starts at 616_608 abs == 480 + 616_128
+    * starts with "\ff I R B \0" ??? -> new file header ???
+  * 616_320 total size completed
+* 3rd image block: 
+  with magic bytes seems to start at 1_236_896
+
+--> pattern seems to be that full IRB files are just written one after another,
+end-to-end
+
+* last IRB magic bytes occur at 1_270_346_144
+ - but does not seem to be full image anymore? just meta-data?
+
+------------------
+trying this out:
+* where 2nd image data would start, have 192 bytes of "[Merge] ..." blob ???
+ - then again IrbImage meta-data
+ - and raw image data to start at 622_496
+  -> would expect to be done at 1_236_896 
+    -> yep, there is the next "\ff I R B \0" magic bytes!
+* header, image meta-data, and where actual image data should start we have the "[Merge] ... " block again!!!
+ - 3rd actual raw image data then starts at 1_242_784
+   - expected to go until 1_242_784 + 614_400 = 1_857_184
+    -> yep, there is the next "\ff I R B \0" magic byte sequence !!!
+
+--> seem to have found the pattern !!!
+ (state of 2024-06-18)
+
+[Merge] block: 192 bytes, but then zero-padded with another 1984 bytes
+  for a total size of 192 + 1984 = 2176
+(COULD be reference to Orwell's 1984 book - they just needed some number of placeholder bytes
+ for potential future extensions ???)
+
+
+* magic bytes of 2nd image at 616_608
+ -> until merge block, have 1920 bytes
+ -> IrbImage meta-data has length of 1728 bytes -> 1920 - 1728 = 192 bytes
+
+* "[Merge]..." block starts at 618_528
+  * from end of "[Merge] ..." block (length 2176 incl zero padding) -> at 620_704
+    to start of raw image data -> at 622_496 
+    -> dist is 622_496 - 620_704 = 1792 bytes
+* assuming same IrbImage header and meta-data -> needs 1728 bytes
+ - would mean that actual IrbImage starts at 622_496 - 1728 = 620_768 !!!
+ - seems to be ok:
+  - short bytesPerPixel: 2
+  - short compressed: 0
+  - short width = 640
+  - short height = 480
+  - .. from there on
+* would mean that Merge block has length of 620_768 - 618_528 = 2240 bytes
+ * 192 bytes of text(?) -> 2048 bytes remain
+ * 1984 bytes of zeros -> 64 bytes remain
+ * 64 bytes of stuff(?) -> unknown...
+
+
+------------------
+
+ASSUMING 1st image block starts at 480
+- size per image (assuming next one starts at 616_800) is 616_320 bytes
+--> 614_400 bytes per frame -- 1920 bytes remain for header and palette
+  (we have 616_800 - 614_400 - 480 = 1920 bytes for header and palette data)
+
+ASSUMING 2nd image block starts at 616_800
+- bytesPerPixel = 2, not compressed, 640 x 480 --> seems to make sense!
