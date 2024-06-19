@@ -32,10 +32,12 @@ public class IrbHeaderBlock {
 
 	protected void readIrbHeader(ByteBuffer buf) {
 
+		final int initialPosition = buf.position();
+
 		final int blockTypeInt = buf.getInt();
 		logger.log(Level.DEBUG, String.format("block type: %d", blockTypeInt));
 		blockType = IrbBlockType.fromInt(blockTypeInt);
-		System.out.printf("found block: %s\n", blockType);
+		System.out.printf("  found block: %s\n", blockType);
 
 		// always 100 ???
 		dword2 = buf.getInt();
@@ -53,10 +55,11 @@ public class IrbHeaderBlock {
 
 		// head has fixed size of 0x6C0
 		// but check against headerSize...
-		headerSize = 0x6C0;
+		headerSize = 0x6C0; // == 1728 ??? FIXME check this !!!
 		if (headerSize > size) {
 			headerSize = size;
 		}
+		// headerSize = Math.min(headerSize, size);
 		logger.log(Level.DEBUG, String.format("headerSize: %d", headerSize));
 
 		headerOffset = 0;
@@ -74,5 +77,11 @@ public class IrbHeaderBlock {
 
 		dword8 = buf.getInt();
 		logger.log(Level.DEBUG, String.format("dword8: %d", dword8));
+
+		System.out.println("  length of IrbHeaderBlock: " + (buf.position() - initialPosition));
+		if (buf.position() - initialPosition != 32) {
+			throw new RuntimeException("IrbHeaderBlock expected to amount to 32 bytes, but read "
+					+ (buf.position() - initialPosition));
+		}
 	}
 }

@@ -113,25 +113,47 @@ public class IrbImage {
 	 */
 	public IrbImage(ByteBuffer buf, int offset, int size) {
 
+		// TODO next: remove offset and size from arg list of this constructor...
+
+
 		// save current buffer position
 		final int oldPos = buf.position();
 
-		logger.log(Level.INFO, "reading IrbImage starting at offset " + offset);
+		logger.log(Level.DEBUG, "reading IrbImage starting at offset " + offset);
 
 		// read image data
 		buf.position(offset);
+		readImageHeader(buf);
+
+		final int flagsPosition = offset + FLAGS_OFFSET; // offset + 1084
+		readImageFlags(buf, flagsPosition);
+
+		// TODO: is this IrbHeaderBlock.headerSize ???
+		int bindataOffset = 0x6c0; // 1728 ???
+		int paletteOffset = 60;
+		boolean useCompression = (compressed != 0);
+		logger.log(Level.DEBUG, "use compression? " + useCompression);
+		readImageData(buf, offset, bindataOffset, width, height, paletteOffset, useCompression);
+
+		// restore old position
+		buf.position(oldPos);
+	}
+
+	protected void readImageHeader(ByteBuffer buf) {
+
+		final int initialPosition = buf.position();
 
 		bytePerPixel = buf.getShort();
-		logger.log(Level.INFO, "bytePerPixel: " + bytePerPixel);
+		logger.log(Level.DEBUG, "bytePerPixel: " + bytePerPixel);
 
 		compressed = buf.getShort();
-		logger.log(Level.INFO, "compressed: " + compressed);
+		logger.log(Level.DEBUG, "compressed: " + compressed);
 
 		width = buf.getShort();
-		logger.log(Level.INFO, "width: " + width);
+		logger.log(Level.DEBUG, "width: " + width);
 
 		height = buf.getShort();
-		logger.log(Level.INFO, "height: " + height);
+		logger.log(Level.DEBUG, "height: " + height);
 
 		// don't know: always 0
 		final int var0 = buf.getInt();
@@ -160,7 +182,7 @@ public class IrbImage {
 		// don't know: always 0
 		// TODO: is -32768 for VARIOCAM, but 0 for oSaveIRB
 		final short var2 = buf.getShort();
-		logger.log(Level.INFO, "var2: " + var2);
+		logger.log(Level.DEBUG, "var2: " + var2);
 		checkIs(0, var2);
 
 		// don't know: always 0
@@ -168,13 +190,13 @@ public class IrbImage {
 		checkIs(0, var3);
 
 		emissivity = buf.getFloat();
-		logger.log(Level.INFO, "emissivity: " + emissivity);
+		logger.log(Level.DEBUG, "emissivity: " + emissivity);
 
 		distance = buf.getFloat();
-		logger.log(Level.INFO, "distance: " + distance);
+		logger.log(Level.DEBUG, "distance: " + distance);
 
 		environmentalTemp = buf.getFloat();
-		logger.log(Level.INFO, "environmentalTemp: " + environmentalTemp);
+		logger.log(Level.DEBUG, "environmentalTemp: " + environmentalTemp);
 
 		// don't know: always 0
 		final short var4 = buf.getShort();
@@ -184,11 +206,11 @@ public class IrbImage {
 		// TODO: is -32768 for VARIOCAM, oSaveIRB (from VARIOCAM_HD)
 		// --> 0x8000 as unsigned short ???
 		final short var5 = buf.getShort();
-		logger.log(Level.INFO, "var5: " + var5);
+		logger.log(Level.DEBUG, "var5: " + var5);
 		checkIs(0, var5);
 
 		pathTemperature = buf.getFloat();
-		logger.log(Level.INFO, "pathTemperature: " + pathTemperature);
+		logger.log(Level.DEBUG, "pathTemperature: " + pathTemperature);
 
 		// don't know: always 0x65 --> ASCII "e"
 		// TODO: is 0 for VARIOCAM
@@ -198,11 +220,11 @@ public class IrbImage {
 		// don't know: always 0
 		// TODO: is 16256 for VARIOCAM
 		final short var7 = buf.getShort();
-		logger.log(Level.INFO, "var7: " + var7);
+		logger.log(Level.DEBUG, "var7: " + var7);
 		checkIs(0, var7);
 
 		centerWavelength = buf.getFloat();
-		logger.log(Level.INFO, "centerWavelength: " + centerWavelength);
+		logger.log(Level.DEBUG, "centerWavelength: " + centerWavelength);
 
 		// don't know: always 0
 		final short var8 = buf.getShort();
@@ -229,21 +251,10 @@ public class IrbImage {
 			return;
 		}
 
-		int headerLength = buf.position() - offset;
-		logger.log(Level.INFO, "header length so far is " + headerLength); // 60 bytes
+		int headerLength = buf.position() - initialPosition;
+		System.out.printf("header length so far is %d\n", headerLength); // 60 bytes
 
-		final int flagsPosition = offset + FLAGS_OFFSET; // offset + 1084
-		readImageFlags(buf, flagsPosition);
 
-		// TODO: is this IrbHeaderBlock.headerSize ???
-		int bindataOffset = 0x6c0; // 1728 ???
-		int paletteOffset = 60;
-		boolean useCompression = (compressed != 0);
-		logger.log(Level.INFO, "use compression? " + useCompression);
-		readImageData(buf, offset, bindataOffset, width, height, paletteOffset, useCompression);
-
-		// restore old position
-		buf.position(oldPos);
 	}
 
 	private void readImageFlags(ByteBuffer buf, int position) {
@@ -356,7 +367,7 @@ public class IrbImage {
 				matrixDataPos++;
 			}
 		} else {
-			logger.log(Level.INFO, "start reading image at offset " + (offset + v1_pos));
+			logger.log(Level.DEBUG, "start reading image at offset " + (offset + v1_pos));
 
 			// no compression
 			for (int i = pixelCount; i > 0; i--) {

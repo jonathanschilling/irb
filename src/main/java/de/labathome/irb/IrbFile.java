@@ -57,22 +57,31 @@ public class IrbFile {
 		// read actual image data
 		images = new LinkedList<>();
 		for (IrbHeaderBlock block : headerBlocks) {
-			System.out.println("starting to read block of type "
-					+ block.blockType + " at offset " + block.offset + " of size " + block.size);
+			if (block.blockType != IrbBlockType.EMPTY) {
+				System.out.println("reading contents of block of type "
+						+ block.blockType + " at offset " + block.offset + " of size " + block.size);
+			}
+
 			if (block.blockType == IrbBlockType.IMAGE) {
 				IrbImage image = new IrbImage(buf, block.offset, block.size);
 				images.add(image);
+			} else {
+				// just read past the whatever block...
+				byte[] dummy = new byte[block.size];
+				buf.get(dummy);
+
+				System.out.printf("read dummy %d bytes; now at position %d\n", block.size, buf.position());
 			}
 		}
 
-		if (headerBlocks.size() == 0) {
-			return;
-		}
-
-		IrbHeaderBlock lastBlock = headerBlocks.get(headerBlocks.size() - 1);
-		if (fileType == IrbFileType.O_SAVE_IRB && lastBlock.blockType == IrbBlockType.HEADER) {
+//		if (headerBlocks.size() == 0) {
+//			return;
+//		}
+//
+//		IrbHeaderBlock lastBlock = headerBlocks.get(headerBlocks.size() - 1);
+		if (fileType == IrbFileType.O_SAVE_IRB) {
 			final int dummySize = 0; //not actually needed...
-			IrbImage image = new IrbImage(buf, lastBlock.offset + lastBlock.size, dummySize);
+			IrbImage image = new IrbImage(buf, buf.position(), dummySize);
 			images.add(image);
 		}
 
@@ -90,6 +99,8 @@ public class IrbFile {
 	}
 
 	private void parseHeader(ByteBuffer buf, boolean forceReadOneImageAfterHeaderBlocks) {
+
+		final int initialPos = buf.position();
 
 		// parse magic number ID
 		final byte[] magicBytes = new byte[5];
@@ -120,13 +131,28 @@ public class IrbFile {
 		blockCount = buf.getInt();
 		logger.log(Level.DEBUG, String.format("block offset=%d, block count=%d", blockOffset, blockCount));
 
+//		System.out.println("size of header, fixed part: " + (buf.position() - initialPos));
+		if (buf.position() - initialPos != 33) {
+			System.out.println("warning: fixed part of IRB file header was not read correctly?");
+		}
+
+		System.out.println("header blocks expected to start at " + blockOffset);
+
 		// read header blocks
 		headerBlocks = new LinkedList<>();
-		buf.position(blockOffset);
+		buf.position(initialPos + blockOffset);
+		int sizeOfAllHeaderBlocks = 0;
 		for (int i = 0; i < blockCount; ++i) {
+			System.out.printf("starting to read block %d at position %d\n", i, buf.position());
 			IrbHeaderBlock headerBlock = new IrbHeaderBlock(buf);
 			headerBlocks.add(headerBlock);
+			System.out.println("  offset parameter in header block is " + headerBlock.offset);
+			System.out.println("  size   parameter in header block is " + headerBlock.size);
+			sizeOfAllHeaderBlocks += headerBlock.size;
 		}
+
+		final int endOfHeaderBlocks = initialPos + blockOffset + sizeOfAllHeaderBlocks;
+		System.out.println("end of header blocks at " + endOfHeaderBlocks + " pos=" + buf.position());
 	}
 
 	public IrbFileType fileType() {
