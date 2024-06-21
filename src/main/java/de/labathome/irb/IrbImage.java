@@ -131,7 +131,8 @@ public class IrbImage {
 		// now at +60 + +1024 == +1084 bytes
 
 		final int flagsPosition = offset + FLAGS_OFFSET; // offset + 1084 -> ha, a match!
-		readImageFlags(buf, flagsPosition);
+		readImageFlags(buf, flagsPosition); // 644 bytes
+		// now at 60 + 1024 + 644 = 1728 bytes
 
 		// TODO: is this IrbHeaderBlock.headerSize ???
 		int bindataOffset = 0x6c0; // 1728 ???

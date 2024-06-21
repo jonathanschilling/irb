@@ -1,3 +1,56 @@
+That seems to conclude the pattern of this kind of video file:
+1. IRB file header (64 bytes)
+ a. list a few header blocks, most of them empty, one HEADER (11 blocks, each 32 bytes)
+ b. after header blocks, contents of HEADER (64 bytes)
+2. for this kind of file, _blindly_ assume that there is an IrbImage
+   after the end of the header block contents
+ a. IrbImage header (60 bytes)
+ b. IrbImage palette (1024 bytes)
+ c. IrbImage metadata (644 bytes)
+ d. IrbImage uncompressed raw data (614_400 bytes)
+--- at 616_608: 64 + 11*32 + 64 + 60 + 1024 + 644 + 614_400 = 616_608 (check!)
+3. from that point on, repeated "VARIOCAM" IRB files are just appended to this initial "front matter" image
+ a. IRB file header (64 bytes)
+ b. 4 header blocks: IMAGE, TEXT_INFO, EMPTY, EMPTY (32 bytes each)
+ c. IrbImage header (60 bytes)
+ d. IrbImage palette (1024 bytes)
+ e. IrbImage metadata (644 bytes)
+ f. TEXT_INFO contents (2176 bytes, as announced in its header block in the `size` attribute)
+ g. 2 header blocks: IMAGE, HEADER (32 bytes each)
+ h. IrbImage header (60 bytes)
+ i. IrbImage palette (1024 bytes)
+ j. IrbImage metadata (644 bytes)
+ k. IrbImage uncompressed raw data (614_400 bytes)
+ -> 64 + 4*32 + 60 + 1024 + 644 + 2176 + 2*32 + 60 + 1024 + 644 + 614400
+    = 620_288 bytes per such image --> checks out with numbers below!
+
+These images are repeated until the file ends.
+Note that the last image ends after the end of the TEXT_INFO contents,
+i.e., no additional header blocks and raw image contents follow.
+Maybe they are in a second file?
+i.e. a new file is started if the current file stream would exceed a certain size limit
+if the next block to be written would make this file bigger than the limit?
+
+-----
+
+2nd raw data starts at 622_496
+-> expected to end at 622496 + 614400 = 1_236_896
+ -> and indeed, there starts the new IRB image
+
+-> length of an appended image:
+ 1_236_896 - 616_608 = 620_288
+
+-> 4th image expected to start at 616608 + 3 * 620_288 = 2_477_472 -> works!
+
+last image starts at 1_270_346_144
+ -> 1_270_346_144 - 616608 = 1_269_729_536
+ -> 1_269_729_536 / 620_288 = 2047 (integer division without modulus!)
+
+BUT: last IRB file, starting at 1_270_346_144, has no second header block after TEXT_INFO contents...
+and also no image data...?
+
+---
+
 233.14999389648 -- - 40degC
 393.14999389648 -- +120degC
 

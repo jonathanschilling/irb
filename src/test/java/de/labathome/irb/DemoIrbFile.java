@@ -9,8 +9,8 @@ public class DemoIrbFile {
 	}
 
 	public static void run() throws Exception {
-		String filename = "/data/jonathan/Projekte/Programmierung/irbis/perma_0005.irb";
-//		String filename = "/home/jons/00_privat/irb_debugging/perma_0005.irb";
+//		String filename = "/data/jonathan/Projekte/Programmierung/irbis/perma_0005.irb";
+		String filename = "/home/jons/00_privat/irb_debugging/perma_0005.irb";
 
 		IrbFile irbFile = IrbFile.fromFile(filename);
 
