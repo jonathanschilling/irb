@@ -26,8 +26,6 @@ hs_err_pid*
 /target/
 
 # output
-*.irb
 *.dat
-*.png
 *.json
 *Zone.Identifier
