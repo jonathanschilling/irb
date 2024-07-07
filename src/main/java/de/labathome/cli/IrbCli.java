@@ -22,13 +22,13 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-@Command(name = "irb", version = "irb 1.0.3", description = "Process *.irb files")
+@Command(name = "irb", version = "irb 1.1.0", description = "Process *.irb files")
 public class IrbCli implements Callable<Integer> {
 
 	@Parameters(index = "0", description = "The *.irb file to read.")
 	private String filename;
 
-	@Option(names = {"-h", "--headless"}, description = "Save the image to disk instead of displaying it.")
+	@Option(names = {"--headless"}, description = "Skip GUI plot using JyPlot and just dump image data to disk.")
 	private boolean runHeadless;
 
 	public Integer call() throws Exception {
@@ -67,6 +67,7 @@ public class IrbCli implements Callable<Integer> {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
                 if (!runHeadless) {
                     // try to plot using JyPlot
                     try {
@@ -94,8 +95,8 @@ public class IrbCli implements Callable<Integer> {
             if (irbFile.frames != null) {
             	// have video frames -> dump them now
 
-            	// parallelize over frames to get going...
-            	final int numThreads = 4;
+            	// parallelize over frames to speed up export
+            	final int numThreads = Runtime.getRuntime().availableProcessors();
             	ExecutorService service = Executors.newFixedThreadPool(numThreads);
 
             	for (int frameIdx = 0; frameIdx < irbFile.frames.size(); ++frameIdx) {
@@ -112,25 +113,30 @@ public class IrbCli implements Callable<Integer> {
     					final int finalImageIdx = imageIdx;
 
         				service.execute(() -> {
-        					System.out.printf("exporting %4d/%4d  %4d/%4d...\n", finalFrameIdx+1, irbFile.frames.size(), finalImageIdx+1, frame.images.size());
+        					try {
+	        					System.out.printf("exporting frame %4d/%4d...\n", finalFrameIdx+1, irbFile.frames.size());
 
-//        					image.exportImageData(String.format(filename + ".img_%04d_%04d.dat", finalFrameIdx, finalImageIdx));
-//	                        image.exportMetaData(String.format(filename + ".meta_%04d_%04d.json", finalFrameIdx, finalImageIdx));
-//	                        ArrayToPNG.dumpAsPng(image.getCelsiusImage(), filename + String.format(".img_%04d_%04d.png", finalFrameIdx, finalImageIdx));
+	        					image.exportImageData(String.format(filename + ".img_%04d_%04d.dat", finalFrameIdx, finalImageIdx));
+		                        image.exportMetaData(String.format(filename + ".meta_%04d_%04d.json", finalFrameIdx, finalImageIdx));
+		                        ArrayToPNG.dumpAsPng(image.getCelsiusImage(), filename + String.format(".img_%04d_%04d.png", finalFrameIdx, finalImageIdx));
 
-	                        if (!runHeadless) {
-	                        	JyPlot plt = new JyPlot();
+		                        if (!runHeadless) {
+		                        	JyPlot plt = new JyPlot();
 
-	                            plt.figure();
-	                            plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('jet')");
-	                            // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('gist_ncar')");
-	                            // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('nipy_spectral')");
-	                            plt.colorbar();
-	                            plt.title(String.format("frame %d, image %d", finalFrameIdx, finalImageIdx));
-	                            plt.savefig(filename + String.format(".plot_%04d_%04d.png", finalFrameIdx, finalImageIdx));
+		                            plt.figure();
+		                            plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('jet')");
+		                            // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('gist_ncar')");
+		                            // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('nipy_spectral')");
+		                            plt.colorbar();
+		                            plt.title(String.format("frame %d, image %d", finalFrameIdx, finalImageIdx));
+		                            plt.savefig(filename + String.format(".plot_%04d_%04d.png", finalFrameIdx, finalImageIdx));
 
-	                            plt.exec();
-	                        }
+		                            plt.exec();
+		                        }
+        					} catch (Exception e) {
+        						// no chance to see if something within threads goes wrong, if not explicitly caught here...
+        						e.printStackTrace();
+        					}
         				});
     				}
             	}
