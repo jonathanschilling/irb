@@ -1,3 +1,8 @@
+/* irb
+ * DemoIrb Class
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package de.labathome.irb;
 
 import java.io.File;
@@ -16,7 +21,7 @@ public class DemoIrb {
 		}
 
 		// video file
-		final String filename = folder + "perma_0005.irb";
+//		final String filename = folder + "perma_0005.irb";
 
 		// snapshots
 //		final String filename = folder + "140114AA/AA011400.irb";
@@ -35,7 +40,7 @@ public class DemoIrb {
 //		final String filename = folder + "140203AA/AA020303.irb";
 //		final String filename = folder + "140203AA/AA020304.irb";
 
-//		final String filename = folder + "140203AB/AB020300.irb";
+		final String filename = folder + "140203AB/AB020300.irb";
 //		final String filename = folder + "140203AB/AB020301.irb";
 //		final String filename = folder + "140203AB/AB020302.irb";
 

@@ -6,7 +6,7 @@ inspired by https://github.com/tomsoftware/Irbis-File-Format .
 This program can be used either as a Maven dependency within another program
 or as a stand-alone commandline utility.  
 The ready-to-use jar can be downloaded here:
-[irb-1.0.3.jar](https://github.com/jonathanschilling/irb/releases/download/v1.0.3/irb-1.0.3.jar)
+[irb-1.1.0.jar](https://github.com/jonathanschilling/irb/releases/download/v1.1.0/irb-1.1.0.jar)
 
 ## Legal disclaimer
 
@@ -25,7 +25,7 @@ Please inform the author about possible legal issues before turning to a lawyer.
 > mvn clean package
 ```
 
-The output will be at `target/irb-1.0.3.jar`.
+The output will be at `target/irb-1.1.0.jar`.
 
 ## Use as a Maven dependency
 
@@ -35,7 +35,7 @@ You can include this project as a dependency in Maven:
 <dependency>
     <groupId>de.labathome</groupId>
     <artifactId>irb</artifactId>
-    <version>1.0.3</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -50,13 +50,13 @@ Run-time dependencies for use with JyPlot:
 Execute the jar with the `*.irb` file as first command line argument:
  
 ```bash
-> java -jar irb-1.0.3.jar AB020300.irb
+> java -jar irb-1.1.0.jar AB020300.irb
 ```
 
 It can also be run in headless mode, where no attempt will be made to plot the image using JyPlot:
 
 ```bash
-> java -jar irb-1.0.3.jar --headless AB020300.irb
+> java -jar irb-1.1.0.jar --headless AB020300.irb
 ```
 
 This will generate two text output files and a direct PNG equivalent of the data:
@@ -80,6 +80,19 @@ You can fix this by telling JyPlot about your Python installation by creating a 
 (`python` on Linux and Mac, `python.exe` on Windows).
 
 The text output files should nevertheless get created.
+
+## Video Files
+
+Since `v1.1.0`, this tool can read and export video files.
+If video data is detected, each frame found in the given file is exported
+in the same way as the headless data (see above).
+Assuming the input file is `video_file.irb`, the output files would be named as follows:
+ * `video_file_<frameIdx>_<imageIdx>_img.dat` is the text file containing a `height`x`width` matrix of the temperature in degrees Celsius
+ * `video_file_<frameIdx>_<imageIdx>_meta.json` is the JSON file containing the meta-data of the respective frame
+ * `video_file_<frameIdx>_<imageIdx>.png` is a raw PNG for quickly having a look. No colorbar is plotted yet
+In these file names, `<frameIdx>` is the frame index, counting the frames up from 0.
+Similarly, `<imageIdx>` is the index of the exported image in the given frame.
+(I don't know why there would be more than one image per video frame, but you never know...)
 
 ## Contributers
 

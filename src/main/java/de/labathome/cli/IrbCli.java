@@ -5,8 +5,6 @@
 
 package de.labathome.cli;
 
-import java.io.File;
-import java.nio.file.Paths;
 import java.util.concurrent.Callable;
 
 import aliceinnets.python.jyplot.JyPlot;
@@ -103,7 +101,6 @@ public class IrbCli implements Callable<Integer> {
 
     				for (int imageIdx = 0; imageIdx < frame.images.size(); ++imageIdx) {
     					IrbImage image = frame.images.get(imageIdx);
-
 
     					String frameFilename;
     					if (filename.toLowerCase().endsWith(".irb")) {

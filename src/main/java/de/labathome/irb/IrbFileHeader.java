@@ -1,10 +1,15 @@
+/* irb
+ * IrbFileHeader Class
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package de.labathome.irb;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class IrbFileHeader {
-	
+
 	/** \ff I R B \0 */
 	private static final byte[] MAGIC_ID = { (byte) 0xff, (byte) 0x49, (byte) 0x52, (byte) 0x42, (byte) 0x0 };
 
