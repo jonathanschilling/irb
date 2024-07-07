@@ -5,22 +5,21 @@
 
 package de.labathome.cli;
 
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.concurrent.Callable;
+
+import aliceinnets.python.jyplot.JyPlot;
+// Our packages
+import de.labathome.irb.IrbFile;
+import de.labathome.irb.IrbImage;
+//3rd Party packages that are part of this repo
+import eu.hoefel.ArrayToPNG;
 // External includes
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
-
-import java.util.concurrent.Callable;
-
-import aliceinnets.python.jyplot.JyPlot;
-
-// Our packages
-import de.labathome.irb.IrbFile;
-import de.labathome.irb.IrbImage;
-
-//3rd Party packages that are part of this repo
-import eu.hoefel.ArrayToPNG;
 
 @Command(name = "irb", version = "irb 1.0.3", description = "Process *.irb files")
 public class IrbCli implements Callable<Integer> {
@@ -89,6 +88,36 @@ public class IrbCli implements Callable<Integer> {
                 }
                 System.out.println("done");
                 imageIndex++;
+            }
+
+            if (irbFile.frames != null) {
+            	// have video frames -> dump them now
+
+            	for (int frameIdx = 0; frameIdx < irbFile.frames.size(); ++frameIdx) {
+    				IrbFile frame = irbFile.frames.get(frameIdx);
+    				System.out.printf("exporting frame %4d/%4d...\n", frameIdx+1, irbFile.frames.size());
+    				if (frame.images == null) {
+    					System.out.println("  skipping frame, since no image was present");
+    					continue;
+    				}
+
+    				for (int imageIdx = 0; imageIdx < frame.images.size(); ++imageIdx) {
+    					IrbImage image = frame.images.get(imageIdx);
+
+
+    					String frameFilename;
+    					if (filename.toLowerCase().endsWith(".irb")) {
+    						frameFilename = filename.substring(0, filename.length() - 4);
+    					} else {
+    						frameFilename = filename;
+    					}
+    					frameFilename += String.format("_%04d_%04d", frameIdx, imageIdx);
+
+    					image.exportImageData(frameFilename + "_img.dat");
+    					image.exportMetaData(frameFilename + "_meta.json");
+                        ArrayToPNG.dumpAsPng(image.getCelsiusImage(), frameFilename + ".png");
+    				}
+            	}
             }
 
         } catch (Exception e) {

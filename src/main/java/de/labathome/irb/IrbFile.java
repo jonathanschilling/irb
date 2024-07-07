@@ -60,7 +60,9 @@ public class IrbFile {
 			irb.frames = new LinkedList<>();
 			int frameCount = 0;
 			while (buf.remaining() > 0) {
-				System.out.println("reading frame " + frameCount);
+				if (frameCount > 0 && frameCount % 100 == 0) {
+					System.out.printf("already read %4d frames...\n", frameCount);
+				}
 				IrbFile frame = IrbFile.read(buf, true);
 				irb.frames.add(frame);
 
