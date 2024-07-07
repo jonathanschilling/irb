@@ -62,6 +62,11 @@ public class TestIrb {
 				}
 			}
 
+			// 64 bytes of general IRB file header, then 10 header blocks of 32 bytes each
+			Assertions.assertEquals(64 + 10 * 32, buf.position() - initialPosition);
+
+			// --------------
+
 			IrbImage image = new IrbImage(buf, headerBlocks[0].offset, headerBlocks[0].size);
 
 			// image header
@@ -95,6 +100,18 @@ public class TestIrb {
 			Assertions.assertEquals(296.5852F, image.minData);
 			Assertions.assertEquals(311.3182F, image.maxData);
 
+			// --------------
+
+			IrbPreview preview = new IrbPreview(buf, headerBlocks[1].offset, headerBlocks[1].size);
+
+			// further tests missing for now...
+			Assertions.assertNotNull(preview);
+
+			// --------------
+
+			IrbTextInfo textInfo = new IrbTextInfo(buf, headerBlocks[2].offset, headerBlocks[2].size);
+
+			Assertions.assertEquals("[Settings]\r\nRMI=PPP1\r\n", textInfo.textInfo);
 		}
 	}
 
