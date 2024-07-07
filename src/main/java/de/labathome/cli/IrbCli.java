@@ -110,8 +110,8 @@ public class IrbCli implements Callable<Integer> {
     					}
     					frameFilename += String.format("_%04d_%04d", frameIdx, imageIdx);
 
-    					image.exportImageData(frameFilename + "_img.dat");
-    					image.exportMetaData(frameFilename + "_meta.json");
+//    					image.exportImageData(frameFilename + "_img.dat");
+//    					image.exportMetaData(frameFilename + "_meta.json");
                         ArrayToPNG.dumpAsPng(image.getCelsiusImage(), frameFilename + ".png");
     				}
             	}
