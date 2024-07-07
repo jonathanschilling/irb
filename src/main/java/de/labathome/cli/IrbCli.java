@@ -6,6 +6,9 @@
 package de.labathome.cli;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import aliceinnets.python.jyplot.JyPlot;
 // Our packages
@@ -91,36 +94,49 @@ public class IrbCli implements Callable<Integer> {
             if (irbFile.frames != null) {
             	// have video frames -> dump them now
 
+            	// parallelize over frames to get going...
+            	final int numThreads = 4;
+            	ExecutorService service = Executors.newFixedThreadPool(numThreads);
+
             	for (int frameIdx = 0; frameIdx < irbFile.frames.size(); ++frameIdx) {
     				IrbFile frame = irbFile.frames.get(frameIdx);
-    				System.out.printf("exporting frame %4d/%4d...\n", frameIdx+1, irbFile.frames.size());
     				if (frame.images == null) {
-    					System.out.println("  skipping frame, since no image was present");
+    					System.out.println("skipping frame " + frameIdx + ", since no image was present");
     					continue;
     				}
 
     				for (int imageIdx = 0; imageIdx < frame.images.size(); ++imageIdx) {
-    					IrbImage image = frame.images.get(imageIdx);
+    					final IrbImage image = frame.images.get(imageIdx);
 
-//    					image.exportImageData(String.format(filename + ".img_%d_%d.dat", frameIdx, imageIndex));
-//                        image.exportMetaData(String.format(filename + ".meta_%d_%d.json", frameIdx, imageIndex));
-//                        ArrayToPNG.dumpAsPng(image.getCelsiusImage(), filename + String.format(".img_%d_%d.png", frameIdx, imageIdx));
+    					final int finalFrameIdx = frameIdx;
+    					final int finalImageIdx = imageIdx;
 
-                        if (!runHeadless) {
-                        	JyPlot plt = new JyPlot();
+        				service.execute(() -> {
+        					System.out.printf("exporting %4d/%4d  %4d/%4d...\n", finalFrameIdx+1, irbFile.frames.size(), finalImageIdx+1, frame.images.size());
 
-                            plt.figure();
-                            plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('jet')");
-                            // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('gist_ncar')");
-                            // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('nipy_spectral')");
-                            plt.colorbar();
-                            plt.title(String.format("frame %d, image %d", frameIdx, imageIndex));
-                            plt.savefig(filename + String.format(".plot_%d_%d.png", frameIdx, imageIdx));
+//        					image.exportImageData(String.format(filename + ".img_%04d_%04d.dat", finalFrameIdx, finalImageIdx));
+//	                        image.exportMetaData(String.format(filename + ".meta_%04d_%04d.json", finalFrameIdx, finalImageIdx));
+//	                        ArrayToPNG.dumpAsPng(image.getCelsiusImage(), filename + String.format(".img_%04d_%04d.png", finalFrameIdx, finalImageIdx));
 
-                            plt.exec();
-                        }
+	                        if (!runHeadless) {
+	                        	JyPlot plt = new JyPlot();
+
+	                            plt.figure();
+	                            plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('jet')");
+	                            // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('gist_ncar')");
+	                            // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('nipy_spectral')");
+	                            plt.colorbar();
+	                            plt.title(String.format("frame %d, image %d", finalFrameIdx, finalImageIdx));
+	                            plt.savefig(filename + String.format(".plot_%04d_%04d.png", finalFrameIdx, finalImageIdx));
+
+	                            plt.exec();
+	                        }
+        				});
     				}
             	}
+
+            	service.shutdown();
+            	service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
             }
 
         } catch (Exception e) {
