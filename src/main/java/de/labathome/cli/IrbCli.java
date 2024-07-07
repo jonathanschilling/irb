@@ -102,17 +102,23 @@ public class IrbCli implements Callable<Integer> {
     				for (int imageIdx = 0; imageIdx < frame.images.size(); ++imageIdx) {
     					IrbImage image = frame.images.get(imageIdx);
 
-    					String frameFilename;
-    					if (filename.toLowerCase().endsWith(".irb")) {
-    						frameFilename = filename.substring(0, filename.length() - 4);
-    					} else {
-    						frameFilename = filename;
-    					}
-    					frameFilename += String.format("_%04d_%04d", frameIdx, imageIdx);
+//    					image.exportImageData(String.format(filename + ".img_%d_%d.dat", frameIdx, imageIndex));
+//                        image.exportMetaData(String.format(filename + ".meta_%d_%d.json", frameIdx, imageIndex));
+//                        ArrayToPNG.dumpAsPng(image.getCelsiusImage(), filename + String.format(".img_%d_%d.png", frameIdx, imageIdx));
 
-//    					image.exportImageData(frameFilename + "_img.dat");
-//    					image.exportMetaData(frameFilename + "_meta.json");
-                        ArrayToPNG.dumpAsPng(image.getCelsiusImage(), frameFilename + ".png");
+                        if (!runHeadless) {
+                        	JyPlot plt = new JyPlot();
+
+                            plt.figure();
+                            plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('jet')");
+                            // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('gist_ncar')");
+                            // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('nipy_spectral')");
+                            plt.colorbar();
+                            plt.title(String.format("frame %d, image %d", frameIdx, imageIndex));
+                            plt.savefig(filename + String.format(".plot_%d_%d.png", frameIdx, imageIdx));
+
+                            plt.exec();
+                        }
     				}
             	}
             }
