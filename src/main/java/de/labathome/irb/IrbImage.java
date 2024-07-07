@@ -463,6 +463,7 @@ public class IrbImage {
 	}
 
 	private static void checkIs(int expected, int val) {
+		// FIXME: figure out the logic behing these values....
 //		if (expected != val) {
 //			System.out.printf("expected %d but got %d\n", expected, val);
 //		}
