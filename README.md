@@ -35,9 +35,11 @@ You can include this project as a dependency in Maven:
 <dependency>
     <groupId>de.labathome</groupId>
     <artifactId>irb</artifactId>
-    <version>1.1.0</version>
+    <version>1.0.3</version>
 </dependency>
 ```
+
+FIXME: The latest released version on Maven Central is still `1.0.3`.
 
 ## Command-line Usage
 
