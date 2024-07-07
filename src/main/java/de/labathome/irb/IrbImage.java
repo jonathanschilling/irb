@@ -110,78 +110,7 @@ public class IrbImage {
 		// read image data
 		buf.position(offset);
 
-		bytePerPixel = buf.getShort();
-		compressed = buf.getShort();
-		width = buf.getShort();
-		height = buf.getShort();
-
-		// don't know: always 0
-		checkIs(0, buf.getInt());
-
-		// don't know: always 0
-		checkIs(0, buf.getShort());
-
-		int widthM1 = buf.getShort();
-		if (width - 1 != widthM1) {
-			System.out.printf("width-1 != widthM1 (%d) ???\n", widthM1);
-		}
-
-		// don't know: always 0
-		checkIs(0, buf.getShort());
-
-		int heightM1 = buf.getShort();
-		if (height - 1 != heightM1) {
-			System.out.printf("height-1 != heightM1 (%d) ???\n", heightM1);
-		}
-
-		// don't know: always 0
-		// TODO: is -32768 for VARIOCAM
-		checkIs(0, buf.getShort());
-
-		// don't know: always 0
-		checkIs(0, buf.getShort());
-
-		emissivity = buf.getFloat();
-		distance = buf.getFloat();
-		environmentalTemp = buf.getFloat();
-
-		// don't know: always 0
-		checkIs(0, buf.getShort());
-
-		// don't know: always 0
-		// TODO: is -32768 for VARIOCAM
-		checkIs(0, buf.getShort());
-
-		pathTemperature = buf.getFloat();
-
-		// don't know: always 0x65
-		// TODO: is 0 for VARIOCAM
-		checkIs(0x65, buf.getShort());
-
-		// don't know: always 0
-		// TODO: is 16256 for VARIOCAM
-		checkIs(0, buf.getShort());
-
-		centerWavelength = buf.getFloat();
-
-		// don't know: always 0
-		checkIs(0, buf.getShort());
-
-		// don't know: always 0x4080
-		checkIs(0x4080, buf.getShort());
-
-		// don't know: always 0x9
-		checkIs(0x9, buf.getShort());
-
-		// don't know: always 0x101
-		checkIs(0x101, buf.getShort());
-
-		if (width > 10000 || height > 10000) {
-			System.out.printf("error: width (%d) or height (%d) out-of-range!\n", width, height);
-			width = 1;
-			height = 1;
-			return;
-		}
+		readImageHeader(buf);
 
 		final int flagsPosition = offset + FLAGS_OFFSET;
 		readImageFlags(buf, flagsPosition);
@@ -194,6 +123,104 @@ public class IrbImage {
 
 		// restore old position
 		buf.position(oldPos);
+	}
+
+	private void readImageHeader(ByteBuffer buf) {
+		final int initialPosition = buf.position();
+
+		bytePerPixel = buf.getShort();
+		compressed = buf.getShort();
+		width = buf.getShort();
+		height = buf.getShort();
+
+		// don't know: always 0
+		int var1 = buf.getInt();
+		checkIs(0, var1);
+
+		// don't know: always 0
+		// could be start of ROI
+		short var2 = buf.getShort();
+		checkIs(0, var2);
+
+		// could be end of ROI
+		int widthM1 = buf.getShort();
+		if (width - 1 != widthM1) {
+			System.out.printf("width-1 != widthM1 (%d) ???\n", widthM1);
+		}
+
+		// don't know: always 0
+		// could be start of ROI
+		short var3 = buf.getShort();
+		checkIs(0, var3);
+
+		// could be end of ROI
+		int heightM1 = buf.getShort();
+		if (height - 1 != heightM1) {
+			System.out.printf("height-1 != heightM1 (%d) ???\n", heightM1);
+		}
+
+		// don't know: always 0
+		// TODO: is -32768 for VARIOCAM
+		short var4 = buf.getShort();
+		checkIs(0, var4);
+
+		// don't know: always 0
+		short var5 = buf.getShort();
+		checkIs(0, var5);
+
+		emissivity = buf.getFloat();
+		distance = buf.getFloat();
+		environmentalTemp = buf.getFloat();
+
+		// don't know: always 0
+		short var6 = buf.getShort();
+		checkIs(0, var6);
+
+		// don't know: always 0
+		// TODO: is -32768 for VARIOCAM
+		short var7 = buf.getShort();
+		checkIs(0, var7);
+
+		pathTemperature = buf.getFloat();
+
+		// don't know: always 0x65
+		// TODO: is 0 for VARIOCAM
+		short var8 = buf.getShort();
+		checkIs(0x65, var8);
+
+		// don't know: always 0
+		// TODO: is 16256 for VARIOCAM
+		short var9 = buf.getShort();
+		checkIs(0, var9);
+
+		centerWavelength = buf.getFloat();
+
+		// don't know: always 0
+		short var10 = buf.getShort();
+		checkIs(0, var10);
+
+		// don't know: always 0x4080
+		short var11 = buf.getShort();
+		checkIs(0x4080, var11);
+
+		// don't know: always 0x9
+		short var12 = buf.getShort();
+		checkIs(0x9, var12);
+
+		// don't know: always 0x101
+		short var13 = buf.getShort();
+		checkIs(0x101, var13);
+
+		if (width > 10000 || height > 10000) {
+			System.out.printf("error: width (%d) or height (%d) out-of-range!\n", width, height);
+			width = 1;
+			height = 1;
+			return;
+		}
+
+		if (buf.position() - initialPosition != 60) {
+			throw new RuntimeException("byte counting error in parsing of IrbImage header");
+		}
 	}
 
 	private void readImageFlags(ByteBuffer buf, int position) {
@@ -398,7 +425,7 @@ public class IrbImage {
 
 	/**
 	 * Export all meta-data (except the actual image data) to a JSON file.
-	 * 
+	 *
 	 * @param filename file to export metadata to
 	 */
 	public void exportMetaData(String filename) {
@@ -416,7 +443,7 @@ public class IrbImage {
 
 	/**
 	 * Export image data as 2d text file.
-	 * 
+	 *
 	 * @param filename file to export image data to
 	 */
 	public void exportImageData(String filename) {

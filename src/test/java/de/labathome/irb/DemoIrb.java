@@ -16,10 +16,10 @@ public class DemoIrb {
 		}
 
 		// video file
-		final String filename = folder + "perma_0005.irb"; // ERROR
+//		final String filename = folder + "perma_0005.irb"; // ERROR
 
 		// snapshots
-//		final String filename = folder + "140114AA/AA011400.irb";
+		final String filename = folder + "140114AA/AA011400.irb";
 //		final String filename = folder + "140114AA/AA011401.irb";
 
 //		final String filename = folder + "140115AA/AA011500.irb";

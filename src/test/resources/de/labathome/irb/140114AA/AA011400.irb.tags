@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wxHexEditor_XML_TAG>
+  <filename path="/data/jonathan/work/code/eclipse_wksp/irb/src/test/resources/de/labathome/irb/140114AA/AA011400.irb.tags">
+    <TAG id="0">
+      <start_offset>0</start_offset>
+      <end_offset>63</end_offset>
+      <tag_text>IrbFileHeader</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#A1B08A</note_colour>
+    </TAG>
+    <TAG id="1">
+      <start_offset>0</start_offset>
+      <end_offset>4</end_offset>
+      <tag_text>magic</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#FFBE6F</note_colour>
+    </TAG>
+    <TAG id="2">
+      <start_offset>5</start_offset>
+      <end_offset>12</end_offset>
+      <tag_text>fileType</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#F66151</note_colour>
+    </TAG>
+    <TAG id="3">
+      <start_offset>13</start_offset>
+      <end_offset>20</end_offset>
+      <tag_text>fileType2</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#ED333B</note_colour>
+    </TAG>
+    <TAG id="4">
+      <start_offset>24</start_offset>
+      <end_offset>21</end_offset>
+      <tag_text>flag1</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#DC8ADD</note_colour>
+    </TAG>
+    <TAG id="5">
+      <start_offset>28</start_offset>
+      <end_offset>25</end_offset>
+      <tag_text>blockOffset</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#CDAB8F</note_colour>
+    </TAG>
+    <TAG id="6">
+      <start_offset>32</start_offset>
+      <end_offset>29</end_offset>
+      <tag_text>blockCount</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#8FF0A4</note_colour>
+    </TAG>
+    <TAG id="7">
+      <start_offset>64</start_offset>
+      <end_offset>95</end_offset>
+      <tag_text>IMAGE header block</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#DC8ADD</note_colour>
+    </TAG>
+    <TAG id="8">
+      <start_offset>67</start_offset>
+      <end_offset>64</end_offset>
+      <tag_text>blockType</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#E01B24</note_colour>
+    </TAG>
+    <TAG id="9">
+      <start_offset>75</start_offset>
+      <end_offset>72</end_offset>
+      <tag_text>frameIndex</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#9141AC</note_colour>
+    </TAG>
+    <TAG id="10">
+      <start_offset>79</start_offset>
+      <end_offset>76</end_offset>
+      <tag_text>offset</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#986A44</note_colour>
+    </TAG>
+    <TAG id="11">
+      <start_offset>83</start_offset>
+      <end_offset>80</end_offset>
+      <tag_text>size</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#DEDDDA</note_colour>
+    </TAG>
+    <TAG id="12">
+      <start_offset>96</start_offset>
+      <end_offset>127</end_offset>
+      <tag_text>PREVIEW header block</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#F9F06B</note_colour>
+    </TAG>
+    <TAG id="13">
+      <start_offset>99</start_offset>
+      <end_offset>96</end_offset>
+      <tag_text>blockType</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#DEDDDA</note_colour>
+    </TAG>
+    <TAG id="14">
+      <start_offset>107</start_offset>
+      <end_offset>104</end_offset>
+      <tag_text>frameIndex</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#1C71D8</note_colour>
+    </TAG>
+    <TAG id="15">
+      <start_offset>111</start_offset>
+      <end_offset>108</end_offset>
+      <tag_text>offset</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#2EC27E</note_colour>
+    </TAG>
+    <TAG id="16">
+      <start_offset>115</start_offset>
+      <end_offset>112</end_offset>
+      <tag_text>size</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#F5C211</note_colour>
+    </TAG>
+    <TAG id="17">
+      <start_offset>128</start_offset>
+      <end_offset>159</end_offset>
+      <tag_text>TEXT_INFO header block</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#FFBE6F</note_colour>
+    </TAG>
+    <TAG id="18">
+      <start_offset>131</start_offset>
+      <end_offset>128</end_offset>
+      <tag_text>blockType</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#C01C28</note_colour>
+    </TAG>
+    <TAG id="19">
+      <start_offset>139</start_offset>
+      <end_offset>136</end_offset>
+      <tag_text>frameIndex</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#813D9C</note_colour>
+    </TAG>
+    <TAG id="20">
+      <start_offset>143</start_offset>
+      <end_offset>140</end_offset>
+      <tag_text>offset</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#865E3C</note_colour>
+    </TAG>
+    <TAG id="21">
+      <start_offset>147</start_offset>
+      <end_offset>144</end_offset>
+      <tag_text>size</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#E5A50A</note_colour>
+    </TAG>
+    <TAG id="22">
+      <start_offset>160</start_offset>
+      <end_offset>191</end_offset>
+      <tag_text>EMPTY header block</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#F66151</note_colour>
+    </TAG>
+    <TAG id="23">
+      <start_offset>192</start_offset>
+      <end_offset>223</end_offset>
+      <tag_text>EMPTY header block</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#DC8ADD</note_colour>
+    </TAG>
+    <TAG id="24">
+      <start_offset>224</start_offset>
+      <end_offset>255</end_offset>
+      <tag_text>EMPTY header block</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#CDAB8F</note_colour>
+    </TAG>
+    <TAG id="25">
+      <start_offset>256</start_offset>
+      <end_offset>287</end_offset>
+      <tag_text>EMPTY header block</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#77767B</note_colour>
+    </TAG>
+    <TAG id="26">
+      <start_offset>288</start_offset>
+      <end_offset>319</end_offset>
+      <tag_text>EMPTY header block</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#62A0EA</note_colour>
+    </TAG>
+    <TAG id="27">
+      <start_offset>320</start_offset>
+      <end_offset>351</end_offset>
+      <tag_text>EMPTY header block</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#57E389</note_colour>
+    </TAG>
+    <TAG id="28">
+      <start_offset>352</start_offset>
+      <end_offset>383</end_offset>
+      <tag_text>EMPTY header block</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#F8E45C</note_colour>
+    </TAG>
+    <TAG id="29">
+      <start_offset>384</start_offset>
+      <end_offset>5215</end_offset>
+      <tag_text>PREVIEW</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#FF7800</note_colour>
+    </TAG>
+    <TAG id="30">
+      <start_offset>621343</start_offset>
+      <end_offset>5216</end_offset>
+      <tag_text>IrbImage</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#9141AC</note_colour>
+    </TAG>
+    <TAG id="31">
+      <start_offset>621344</start_offset>
+      <end_offset>621365</end_offset>
+      <tag_text>TextInfo</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#2EC27E</note_colour>
+    </TAG>
+  </filename>
+</wxHexEditor_XML_TAG>
