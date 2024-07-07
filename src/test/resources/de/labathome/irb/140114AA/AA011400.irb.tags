@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wxHexEditor_XML_TAG>
-  <filename path="/data/jonathan/work/code/eclipse_wksp/irb/src/test/resources/de/labathome/irb/140114AA/AA011400.irb.tags">
+  <filename path="/data/jonathan/work/code/eclipse_wksp/irb/src/test/resources/de/labathome/irb/140114AA/AA011400.irb">
     <TAG id="0">
-      <start_offset>0</start_offset>
-      <end_offset>63</end_offset>
-      <tag_text>IrbFileHeader</tag_text>
-      <font_colour>#000000</font_colour>
-      <note_colour>#A1B08A</note_colour>
-    </TAG>
-    <TAG id="1">
       <start_offset>0</start_offset>
       <end_offset>4</end_offset>
       <tag_text>magic</tag_text>
       <font_colour>#000000</font_colour>
       <note_colour>#FFBE6F</note_colour>
+    </TAG>
+    <TAG id="1">
+      <start_offset>0</start_offset>
+      <end_offset>63</end_offset>
+      <tag_text>IrbFileHeader</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#A1B08A</note_colour>
     </TAG>
     <TAG id="2">
       <start_offset>5</start_offset>

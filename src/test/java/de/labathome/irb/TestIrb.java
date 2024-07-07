@@ -67,7 +67,7 @@ public class TestIrb {
 
 			// --------------
 
-			IrbImage image = new IrbImage(buf, headerBlocks[0].offset, headerBlocks[0].size);
+			IrbImage image = IrbImage.controlledRead(buf, headerBlocks[0].offset, headerBlocks[0].size, false);
 
 			// image header
 			Assertions.assertEquals(2, image.bytesPerPixel);

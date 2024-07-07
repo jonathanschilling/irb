@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 public class IrbPreview {
 
 	/**
-	 * Read the preview blob.
+	 * Read the PREVIEW data blob.
 	 *
 	 * @param buf    buffer to read image from
 	 * @param offset

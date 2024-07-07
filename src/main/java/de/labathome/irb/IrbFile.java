@@ -35,41 +35,87 @@ public class IrbFile {
 	public List<IrbImage> images;
 	public List<IrbPreview> previews;
 	public List<IrbTextInfo> textInfos;
+	public List<IrbHeader> headers;
 
-	public IrbFile(ByteBuffer buf) {
+	// video data
+	public List<IrbFile> frames;
+
+	public static IrbFile fromFile(String filename) throws IOException {
+		if (!(new File(filename).exists())) {
+			throw new RuntimeException("File '" + filename + "' does not exists!");
+		}
+
+		RandomAccessFile memoryFile = new RandomAccessFile(filename, "r");
+		MappedByteBuffer buf = memoryFile.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, memoryFile.length());
+
+		IrbFile irb = IrbFile.read(buf, false);
+
+		if (irb.header.fileType == IrbFileType.O_SAVE_IRB) {
+
+			// preview image
+			IrbImage frontMatter = new IrbImage(buf, false);
+			irb.images.add(frontMatter);
+
+			// now read frames, appended one after another
+			irb.frames = new LinkedList<>();
+			int frameCount = 0;
+			while (buf.remaining() > 0) {
+				System.out.println("reading frame " + frameCount);
+				IrbFile frame = IrbFile.read(buf, true);
+				irb.frames.add(frame);
+
+				frameCount++;
+			}
+		}
+
+		memoryFile.close();
+
+		return irb;
+	}
+
+	public static IrbFile read(ByteBuffer buf, boolean isVideoFrame) {
 		final int initialPosition = buf.position();
 
 		// NOTE: in irbis-file-format, the routines are named readIntBE,
 		// although they actually read little endian!
 		buf.order(ByteOrder.LITTLE_ENDIAN);
 
-		header = new IrbFileHeader(buf);
+		IrbFile irb = new IrbFile();
+
+		irb.header = new IrbFileHeader(buf);
 
 		// read header blocks
-		headerBlocks = new LinkedList<>();
-		buf.position(initialPosition + header.blockOffset);
-		for (int i = 0; i < header.blockCount; ++i) {
+		irb.headerBlocks = new LinkedList<>();
+		buf.position(initialPosition + irb.header.blockOffset);
+		for (int i = 0; i < irb.header.blockCount; ++i) {
 			IrbHeaderBlock headerBlock = new IrbHeaderBlock(buf);
-			headerBlocks.add(headerBlock);
+			irb.headerBlocks.add(headerBlock);
 		}
 
 		// read actual image data
-		images = new LinkedList<>();
-		previews = new LinkedList<>();
-		textInfos = new LinkedList<>();
-		for (IrbHeaderBlock block : headerBlocks) {
+		irb.images = new LinkedList<>();
+		irb.previews = new LinkedList<>();
+		irb.textInfos = new LinkedList<>();
+		irb.headers = new LinkedList<>();
+		for (IrbHeaderBlock block : irb.headerBlocks) {
 			switch (block.blockType) {
 			case IMAGE:
-				IrbImage image = new IrbImage(buf, block.offset, block.size);
-				images.add(image);
+				IrbImage image = IrbImage.controlledRead(buf, initialPosition + block.offset, block.size, /*isVideoFrameFirstRead=*/isVideoFrame);
+				if (!isVideoFrame) {
+					irb.images.add(image);
+				}
 				break;
 			case PREVIEW:
-				IrbPreview preview = new IrbPreview(buf, block.offset, block.size);
-				previews.add(preview);
+				IrbPreview preview = new IrbPreview(buf, initialPosition + block.offset, block.size);
+				irb.previews.add(preview);
 				break;
 			case TEXT_INFO:
-				IrbTextInfo textInfo = new IrbTextInfo(buf, block.offset, block.size);
-				textInfos.add(textInfo);
+				IrbTextInfo textInfo = new IrbTextInfo(buf, initialPosition + block.offset, block.size);
+				irb.textInfos.add(textInfo);
+				break;
+			case HEADER:
+				IrbHeader header = IrbHeader.controlledRead(buf, initialPosition + block.offset, block.size);
+				irb.headers.add(header);
 				break;
 			case EMPTY:
 				if (block.offset != 0 || block.size != 0) {
@@ -81,24 +127,31 @@ public class IrbFile {
 				throw new RuntimeException("block not implemented yet:" + block.blockType);
 			}
 		}
+
+		if (isVideoFrame && buf.remaining() > 0) {
+			// expect an IMAGE header block
+			IrbHeaderBlock imageHeaderBlock = new IrbHeaderBlock(buf);
+			if (imageHeaderBlock.blockType != IrbBlockType.IMAGE) {
+				throw new RuntimeException("expecting IMAGE header block, but got " + imageHeaderBlock.blockType);
+			}
+
+//			System.out.println("  frame index: " + imageHeaderBlock.frameIndex);
+
+			// expect a HEADER header block
+			IrbHeaderBlock headerHeaderBlock = new IrbHeaderBlock(buf);
+			if (headerHeaderBlock.blockType != IrbBlockType.HEADER) {
+				throw new RuntimeException("expecting HEADER header block, but got " + headerHeaderBlock.blockType);
+			}
+
+			// now comes the actual frame image
+			IrbImage image = new IrbImage(buf, /*isVideoFrameFirstRead=*/false);
+			irb.images.add(image);
+		}
+
+		return irb;
 	}
 
 	public IrbFileType fileType() {
 		return header.fileType;
-	}
-
-	public static IrbFile fromFile(String filename) throws IOException {
-		if (!(new File(filename).exists())) {
-			throw new RuntimeException("File '" + filename + "' does not exists!");
-		}
-
-		RandomAccessFile memoryFile = new RandomAccessFile(filename, "r");
-		MappedByteBuffer buf = memoryFile.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, memoryFile.length());
-
-		IrbFile file = new IrbFile(buf);
-
-		memoryFile.close();
-
-		return file;
 	}
 }

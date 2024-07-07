@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wxHexEditor_XML_TAG>
+  <filename path="/data/jonathan/work/code/eclipse_wksp/irb/src/test/resources/de/labathome/irb/perma_0005.irb.tags">
+    <TAG id="0">
+      <start_offset>0</start_offset>
+      <end_offset>63</end_offset>
+      <tag_text>IRB file header</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#99C1F1</note_colour>
+    </TAG>
+    <TAG id="1">
+      <start_offset>4</start_offset>
+      <end_offset>0</end_offset>
+      <tag_text>magic bytes</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#62A0EA</note_colour>
+    </TAG>
+    <TAG id="2">
+      <start_offset>5</start_offset>
+      <end_offset>12</end_offset>
+      <tag_text>fileType</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#57E389</note_colour>
+    </TAG>
+    <TAG id="3">
+      <start_offset>13</start_offset>
+      <end_offset>20</end_offset>
+      <tag_text>fileType2</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#F8E45C</note_colour>
+    </TAG>
+    <TAG id="4">
+      <start_offset>24</start_offset>
+      <end_offset>21</end_offset>
+      <tag_text>flag1</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#FFA348</note_colour>
+    </TAG>
+    <TAG id="5">
+      <start_offset>28</start_offset>
+      <end_offset>25</end_offset>
+      <tag_text>blockOffset</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#ED333B</note_colour>
+    </TAG>
+    <TAG id="6">
+      <start_offset>32</start_offset>
+      <end_offset>29</end_offset>
+      <tag_text>blockCount</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#C061CB</note_colour>
+    </TAG>
+    <TAG id="7">
+      <start_offset>64</start_offset>
+      <end_offset>383</end_offset>
+      <tag_text>10 EMPTY header blocks</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#8FF0A4</note_colour>
+    </TAG>
+    <TAG id="8">
+      <start_offset>384</start_offset>
+      <end_offset>415</end_offset>
+      <tag_text>HEADER block</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#F9F06B</note_colour>
+    </TAG>
+    <TAG id="9">
+      <start_offset>387</start_offset>
+      <end_offset>384</end_offset>
+      <tag_text>blockType</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#3584E4</note_colour>
+    </TAG>
+    <TAG id="10">
+      <start_offset>391</start_offset>
+      <end_offset>388</end_offset>
+      <tag_text>dword2</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#33D17A</note_colour>
+    </TAG>
+    <TAG id="11">
+      <start_offset>395</start_offset>
+      <end_offset>392</end_offset>
+      <tag_text>frameIndex</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#F6D32D</note_colour>
+    </TAG>
+    <TAG id="12">
+      <start_offset>399</start_offset>
+      <end_offset>396</end_offset>
+      <tag_text>offset</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#FF7800</note_colour>
+    </TAG>
+    <TAG id="13">
+      <start_offset>403</start_offset>
+      <end_offset>400</end_offset>
+      <tag_text>size</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#E01B24</note_colour>
+    </TAG>
+    <TAG id="14">
+      <start_offset>407</start_offset>
+      <end_offset>404</end_offset>
+      <tag_text>dword6</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#9141AC</note_colour>
+    </TAG>
+    <TAG id="15">
+      <start_offset>411</start_offset>
+      <end_offset>408</end_offset>
+      <tag_text>dword7</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#986A44</note_colour>
+    </TAG>
+    <TAG id="16">
+      <start_offset>415</start_offset>
+      <end_offset>412</end_offset>
+      <tag_text>dword8</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#DEDDDA</note_colour>
+    </TAG>
+    <TAG id="17">
+      <start_offset>616608</start_offset>
+      <end_offset>616671</end_offset>
+      <tag_text>IrbFile header</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#CCA303</note_colour>
+    </TAG>
+    <TAG id="18">
+      <start_offset>616672</start_offset>
+      <end_offset>616703</end_offset>
+      <tag_text>IMAGE header block</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#CCA303</note_colour>
+    </TAG>
+    <TAG id="19">
+      <start_offset>616704</start_offset>
+      <end_offset>616735</end_offset>
+      <tag_text>TEXT_INFO header block</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#CCA303</note_colour>
+    </TAG>
+    <TAG id="20">
+      <start_offset>616736</start_offset>
+      <end_offset>616767</end_offset>
+      <tag_text>EMPTY header block</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#CCA303</note_colour>
+    </TAG>
+    <TAG id="21">
+      <start_offset>616799</start_offset>
+      <end_offset>616768</end_offset>
+      <tag_text>EMPTY header block</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#CCA303</note_colour>
+    </TAG>
+    <TAG id="22">
+      <start_offset>616800</start_offset>
+      <end_offset>616859</end_offset>
+      <tag_text>IrbImage header</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#DC8ADD</note_colour>
+    </TAG>
+    <TAG id="23">
+      <start_offset>616860</start_offset>
+      <end_offset>617883</end_offset>
+      <tag_text>palette</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#CCA303</note_colour>
+    </TAG>
+    <TAG id="24">
+      <start_offset>617884</start_offset>
+      <end_offset>618527</end_offset>
+      <tag_text>IrbImage meta-data</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#F66151</note_colour>
+    </TAG>
+    <TAG id="25">
+      <start_offset>618528</start_offset>
+      <end_offset>620703</end_offset>
+      <tag_text>TEXT_INFO data</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#F9F06B</note_colour>
+    </TAG>
+    <TAG id="26">
+      <start_offset>620768</start_offset>
+      <end_offset>622495</end_offset>
+      <tag_text>IrbImage header, palette, meta-data</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#CDAB8F</note_colour>
+    </TAG>
+  </filename>
+</wxHexEditor_XML_TAG>

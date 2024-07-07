@@ -98,17 +98,43 @@ public class IrbImage {
 	public float[][] data;
 
 	/**
-	 * Read the image data corresponding to this block.
+	 * Read the IMAGE data corresponding to this block.
 	 *
 	 * @param buf    buffer to read image from
 	 * @param offset
 	 * @param size
 	 */
-	public IrbImage(ByteBuffer buf, int offset, int size) {
+	public static IrbImage controlledRead(ByteBuffer buf, int offset, int size, boolean isVideoFrameFirstRead) {
 		buf.position(offset);
 
 		final int initialPosition = buf.position();
 
+		IrbImage image = new IrbImage(buf, isVideoFrameFirstRead);
+
+		final int expectedSize;
+		if (isVideoFrameFirstRead) {
+			// only IrbImage header in first occurence
+			// -->  IrbImage header (60 bytes)
+			//      IrbImage palette (1024 bytes)
+			//      IrbImage metadata (644 bytes)
+			expectedSize = 60 + 1024 + 644;
+		} else {
+			expectedSize = size;
+		}
+
+		if (buf.position() - initialPosition != expectedSize) {
+			throw new RuntimeException("byte counting error in reading of IrbImage; expected " + expectedSize + " but read " + (buf.position() - initialPosition));
+		}
+
+		return image;
+	}
+
+	/**
+	 * Read the IMAGE data corresponding to this block.
+	 * @param buf buffer to read image from
+	 * @param isVideoFrame
+	 */
+	public IrbImage(ByteBuffer buf, boolean isVideoFrameFirstRead) {
 		readImageHeader(buf);
 		// 60
 
@@ -118,14 +144,14 @@ public class IrbImage {
 		readImageMetadata(buf);
 		// 1084 + 644 == 1728
 
+		if (isVideoFrameFirstRead) {
+			return;
+		}
+
 		if (compressed == 0) {
 			readImageDataUncompressed(buf);
 		} else {
 			readImageDataCompressed(buf);
-		}
-
-		if (buf.position() - initialPosition != size) {
-			throw new RuntimeException("byte counting error in reading of IrbImage; expected " + size + " but read " + (buf.position() - initialPosition));
 		}
 	}
 
@@ -293,6 +319,8 @@ public class IrbImage {
 	}
 
 	private void readImageDataUncompressed(ByteBuffer buf) {
+		final int initialPosition = buf.position();
+
 		minData = Float.POSITIVE_INFINITY;
 		maxData = Float.NEGATIVE_INFINITY;
 
@@ -325,8 +353,12 @@ public class IrbImage {
 			}
 		}
 
-		System.out.println("data min: " + minData);
-		System.out.println("data max: " + maxData);
+//		System.out.println("data min: " + minData);
+//		System.out.println("data max: " + maxData);
+
+		if (buf.position() - initialPosition != (height * width * 2)) {
+			throw new RuntimeException("byte counting error in parsing of IrbImage pixel data");
+		}
 	}
 
 	private void readImageDataCompressed(ByteBuffer buf) {
@@ -431,9 +463,9 @@ public class IrbImage {
 	}
 
 	private static void checkIs(int expected, int val) {
-		if (expected != val) {
-			System.out.printf("expected %d but got %d\n", expected, val);
-		}
+//		if (expected != val) {
+//			System.out.printf("expected %d but got %d\n", expected, val);
+//		}
 	}
 
 	private static String readNullTerminatedString(ByteBuffer buf, int len) {

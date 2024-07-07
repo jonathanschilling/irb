@@ -16,10 +16,10 @@ public class DemoIrb {
 		}
 
 		// video file
-//		final String filename = folder + "perma_0005.irb"; // ERROR
+		final String filename = folder + "perma_0005.irb";
 
 		// snapshots
-		final String filename = folder + "140114AA/AA011400.irb";
+//		final String filename = folder + "140114AA/AA011400.irb";
 //		final String filename = folder + "140114AA/AA011401.irb";
 
 //		final String filename = folder + "140115AA/AA011500.irb";
@@ -105,6 +105,25 @@ public class DemoIrb {
 	        plt.title(String.format("image %d", imageIndex));
 
 	        imageIndex++;
+		}
+
+		if (irbFile.frames != null) {
+			// is video file
+			for (int frameIdx = 0; frameIdx < 10; ++frameIdx) {
+				IrbFile frame = irbFile.frames.get(frameIdx);
+
+				int imageInFrame = 0;
+				for (IrbImage image: frame.images) {
+			        plt.figure();
+			        plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('jet')");
+			        // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('gist_ncar')");
+			        // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('nipy_spectral')");
+			        plt.colorbar();
+			        plt.title(String.format("frame %d, image %d", frameIdx, imageInFrame));
+
+			        imageInFrame++;
+				}
+			}
 		}
 
         plt.show();
