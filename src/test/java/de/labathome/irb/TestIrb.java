@@ -47,17 +47,14 @@ public class TestIrb {
 					Assertions.assertEquals(IrbBlockType.IMAGE, headerBlock.blockType);
 					Assertions.assertEquals(5216, headerBlock.offset);
 					Assertions.assertEquals(616128, headerBlock.size);
-
 				} else if (headerBlockIdx == 1) {
 					Assertions.assertEquals(IrbBlockType.PREVIEW, headerBlock.blockType);
 					Assertions.assertEquals(384, headerBlock.offset);
 					Assertions.assertEquals(4832, headerBlock.size);
-
 				} else if (headerBlockIdx == 2) {
 					Assertions.assertEquals(IrbBlockType.TEXT_INFO, headerBlock.blockType);
 					Assertions.assertEquals(621344, headerBlock.offset);
 					Assertions.assertEquals(22, headerBlock.size);
-
 				} else {
 					Assertions.assertEquals(IrbBlockType.EMPTY, headerBlock.blockType);
 					Assertions.assertEquals(0, headerBlock.offset);
@@ -65,7 +62,38 @@ public class TestIrb {
 				}
 			}
 
-			// now read actual data
+			IrbImage image = new IrbImage(buf, headerBlocks[0].offset, headerBlocks[0].size);
+
+			// image header
+			Assertions.assertEquals(2, image.bytesPerPixel);
+			Assertions.assertEquals(0, image.compressed);
+			Assertions.assertEquals(640, image.width);
+			Assertions.assertEquals(480, image.height);
+			Assertions.assertEquals(1.0F, image.emissivity);
+			Assertions.assertEquals(0.80496436F, image.distance);
+			Assertions.assertEquals(298.15F, image.environmentalTemp);
+			Assertions.assertEquals(298.15F, image.pathTemperature);
+			Assertions.assertEquals(9.5F, image.centerWavelength);
+
+			// image metadata
+			Assertions.assertEquals(233.0F, image.calibRangeMin);
+			Assertions.assertEquals(393.0F, image.calibRangeMax);
+			Assertions.assertEquals("VARIOCAM", image.device);
+			Assertions.assertEquals("", image.deviceSerial);
+			Assertions.assertEquals("VarioCAM II standard optics", image.optics);
+			Assertions.assertEquals("IR 1.0/30 LW", image.opticsResolution);
+			Assertions.assertEquals("4001_275213", image.opticsSerial);
+			Assertions.assertEquals(323.15F, image.shotRangeStartErr);
+			Assertions.assertEquals(80.0F, image.shotRangeSize);
+			Assertions.assertEquals("Tue Jan 14 18:33:45 CET 2014", image.timestamp.toString());
+			Assertions.assertEquals(0, image.timestampMillisecond);
+			Assertions.assertEquals("JENOPTIK Laser, Optik, Systeme GmbH : VC HiRes", image.opticsText);
+
+			// actual image data
+			Assertions.assertEquals(480, image.data.length);
+			Assertions.assertEquals(640, image.data[0].length);
+			Assertions.assertEquals(296.5852F, image.minData);
+			Assertions.assertEquals(311.3182F, image.maxData);
 
 		}
 	}

@@ -31,7 +31,10 @@ public class IrbFile {
 	public IrbFileHeader header;
 
 	public List<IrbHeaderBlock> headerBlocks;
+
 	public List<IrbImage> images;
+	public List<IrbPreview> previews;
+	public List<IrbTextInfo> textInfos;
 
 	public IrbFile(ByteBuffer buf) {
 		final int initialPosition = buf.position();
@@ -52,10 +55,30 @@ public class IrbFile {
 
 		// read actual image data
 		images = new LinkedList<>();
+		previews = new LinkedList<>();
+		textInfos = new LinkedList<>();
 		for (IrbHeaderBlock block : headerBlocks) {
-			if (block.blockType == IrbBlockType.IMAGE) {
+			switch (block.blockType) {
+			case IMAGE:
 				IrbImage image = new IrbImage(buf, block.offset, block.size);
 				images.add(image);
+				break;
+			case PREVIEW:
+				IrbPreview preview = new IrbPreview(buf, block.offset, block.size);
+				previews.add(preview);
+				break;
+			case TEXT_INFO:
+				IrbTextInfo textInfo = new IrbTextInfo(buf, block.offset, block.size);
+				textInfos.add(textInfo);
+				break;
+			case EMPTY:
+				if (block.offset != 0 || block.size != 0) {
+					throw new RuntimeException("non-empty EMPTY block? offset=" + block.offset + " size=" + block.size);
+				}
+				// ignore
+				break;
+			default:
+				throw new RuntimeException("block not implemented yet:" + block.blockType);
 			}
 		}
 	}

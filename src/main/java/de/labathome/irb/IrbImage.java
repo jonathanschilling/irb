@@ -17,7 +17,6 @@ import com.google.gson.annotations.Expose;
 
 public class IrbImage {
 
-	private static final int FLAGS_OFFSET = 1084;
 	public static final float CELSIUS_OFFSET = 273.15F;
 
 	@Expose(serialize = true)
@@ -27,7 +26,7 @@ public class IrbImage {
 	public int height;
 
 	@Expose(serialize = true)
-	public short bytePerPixel;
+	public short bytesPerPixel;
 
 	@Expose(serialize = true)
 	public short compressed;
@@ -64,6 +63,9 @@ public class IrbImage {
 
 	@Expose(serialize = true)
 	public String opticsResolution;
+
+	@Expose(serialize = true)
+	public String opticsSerial;
 
 	@Expose(serialize = true)
 	public String opticsText;
@@ -103,32 +105,34 @@ public class IrbImage {
 	 * @param size
 	 */
 	public IrbImage(ByteBuffer buf, int offset, int size) {
-
-		// save current buffer position
-		final int oldPos = buf.position();
-
-		// read image data
 		buf.position(offset);
 
+		final int initialPosition = buf.position();
+
 		readImageHeader(buf);
+		// 60
 
-		final int flagsPosition = offset + FLAGS_OFFSET;
-		readImageFlags(buf, flagsPosition);
+		readPalette(buf);
+		// 60 + 1024 = 1084
 
-		// TODO: is this IrbHeaderBlock.headerSize ???
-		int bindataOffset = 0x6c0;
-		int paletteOffset = 60;
-		boolean useCompression = (compressed != 0);
-		readImageData(buf, offset, bindataOffset, width, height, paletteOffset, useCompression);
+		readImageMetadata(buf);
+		// 1084 + 644 == 1728
 
-		// restore old position
-		buf.position(oldPos);
+		if (compressed == 0) {
+			readImageDataUncompressed(buf);
+		} else {
+			readImageDataCompressed(buf);
+		}
+
+		if (buf.position() - initialPosition != size) {
+			throw new RuntimeException("byte counting error in reading of IrbImage; expected " + size + " but read " + (buf.position() - initialPosition));
+		}
 	}
 
 	private void readImageHeader(ByteBuffer buf) {
 		final int initialPosition = buf.position();
 
-		bytePerPixel = buf.getShort();
+		bytesPerPixel = buf.getShort();
 		compressed = buf.getShort();
 		width = buf.getShort();
 		height = buf.getShort();
@@ -223,33 +227,113 @@ public class IrbImage {
 		}
 	}
 
-	private void readImageFlags(ByteBuffer buf, int position) {
-		// save current buffer position
-		final int oldPos = buf.position();
-
-		calibRangeMin = buf.getFloat(position + 92);
-		calibRangeMax = buf.getFloat(position + 96);
-
-		device = readNullTerminatedString(buf, position + 142, 12);
-		deviceSerial = readNullTerminatedString(buf, position + 450, 16); // was: 186
-		optics = readNullTerminatedString(buf, position + 202, 32);
-		opticsResolution = readNullTerminatedString(buf, position + 234, 32);
-		opticsText = readNullTerminatedString(buf, position + 554, 48);
-
-		shotRangeStartErr = buf.getFloat(position + 532);
-		shotRangeSize = buf.getFloat(position + 536);
-
-		timestampRaw = buf.getDouble(position + 540);
-		timestampMillisecond = buf.getInt(position + 548);
-
-		timestamp = fromDoubleToDateTime(timestampRaw);
-
-		// restore old position
-		buf.position(oldPos);
+	private void readPalette(ByteBuffer buf) {
+		palette = new float[256];
+		for (int i = 0; i < 256; ++i) {
+			palette[i] = buf.getFloat();
+		}
 	}
 
-	private void readImageData(ByteBuffer buf, int offset, int bindataOffset, int width, int height, int paletteOffset,
-			boolean useCompression) {
+	private void readImageMetadata(ByteBuffer buf) {
+		final int initialPosition = buf.position();
+
+		// 0
+		byte[] dummy1 = new byte[92];
+		buf.get(dummy1);
+		// 92
+		calibRangeMin = buf.getFloat();
+		// 96
+		calibRangeMax = buf.getFloat();
+		// 100
+		byte[] dummy2 = new byte[42];
+		buf.get(dummy2);
+		// 142
+		device = readNullTerminatedString(buf, 12);
+		// 154
+		byte[] dummy3 = new byte[10];
+		buf.get(dummy3);
+		// 164
+		deviceSerial = readNullTerminatedString(buf, 16);
+		// 180
+		byte[] dummy3a = new byte[22];
+		buf.get(dummy3a);
+		// 202
+		optics = readNullTerminatedString(buf, 32);
+		// 234
+		opticsResolution = readNullTerminatedString(buf, 32);
+		// 266
+		byte[] dummy4 = new byte[184];
+		buf.get(dummy4);
+		// 450
+		opticsSerial = readNullTerminatedString(buf, 16);
+		// 466
+		byte[] dummy5 = new byte[66];
+		buf.get(dummy5);
+		// 532
+		shotRangeStartErr = buf.getFloat();
+		// 536
+		shotRangeSize = buf.getFloat();
+		// 540
+		timestampRaw = buf.getDouble();
+		timestamp = fromDoubleToDateTime(timestampRaw);
+		// 548
+		timestampMillisecond = buf.getInt();
+		// 552
+		buf.getShort();
+		// 554
+		opticsText = readNullTerminatedString(buf, 48);
+		// 602
+		byte[] dummy6 = new byte[42];
+		buf.get(dummy6);
+		// 644
+
+		if (buf.position() - initialPosition != 644) {
+			throw new RuntimeException("byte counting error in parsing of IrbImage metadata");
+		}
+	}
+
+	private void readImageDataUncompressed(ByteBuffer buf) {
+		minData = Float.POSITIVE_INFINITY;
+		maxData = Float.NEGATIVE_INFINITY;
+
+		data = new float[height][width];
+		for (int y = 0; y < height; ++y) {
+			for (int x = 0; x < width; ++x) {
+
+				short v1 = buf.get();
+				if (v1 < 0) {
+					v1 += 256;
+				}
+
+				float f = v1 / 256.0F;
+
+				short v2 = buf.get();
+				if (v2 < 0) {
+					v2 += 256;
+				}
+
+				// linear interpolation between neighboring palette entries
+				float v = palette[v2 + 1] * f + palette[v2] * (1.0F - f);
+				if (v < 0.0F) {
+					v = 0.0F; // or 255 ...
+				}
+
+				minData = Math.min(minData, v);
+				maxData = Math.max(maxData, v);
+
+				data[y][x] = v;
+			}
+		}
+
+		System.out.println("data min: " + minData);
+		System.out.println("data max: " + maxData);
+	}
+
+	private void readImageDataCompressed(ByteBuffer buf) {
+		// FIXME: likely broken after code cleanup due to lack of test data
+
+		// starting from beginning of IrbImage...
+		int offset = 0;
 
 		int dataSize = width * height;
 
@@ -258,15 +342,13 @@ public class IrbImage {
 
 		int matrixDataPos = 0;
 
-		int v1_pos = bindataOffset;
+		int v1_pos = 1728;
 
 		// used if data is compressed
 		int v2_pos = v1_pos + pixelCount;
 
 		int v1 = 0;
 		int v2 = 0;
-
-		palette = readPalette(buf, offset + paletteOffset);
 
 		int v2_count = 0;
 		float v = 0.0F;
@@ -276,74 +358,41 @@ public class IrbImage {
 		int v1Min = 1000;
 		int v1Max = -1000;
 
-		if (useCompression) {
-			// compression active: run-length encoding
+		// compression active: run-length encoding
 
-			for (int i = pixelCount; i > 0; i--) {
+		for (int i = pixelCount; i > 0; i--) {
 
-				if (v2_count-- < 1) {
-					v2_count = buf.get(offset + v2_pos) - 1;
-					v2_pos++;
-					v2 = buf.get(offset + v2_pos);
-					v2_pos++;
-
-					if (v2 < 0) {
-						v2 += 256;
-					}
-				}
-
-				v1 = buf.get(offset + v1_pos);
-				v1_pos++;
-
-				if (v1 < 0) {
-					v1 += 256;
-				}
-
-				v1Min = Math.min(v1Min, v1);
-				v1Max = Math.max(v1Max, v1);
-
-				f = v1 / 256.0F;
-
-				// linear interpolation between neighboring palette entries
-				v = palette[v2 + 1] * f + palette[v2] * (1.0F - f);
-				if (v < 0.0F) {
-					v = 0.0F; // or 255 ...
-				}
-
-				matrixData[matrixDataPos] = v;
-				matrixDataPos++;
-			}
-		} else {
-			// no compression
-			for (int i = pixelCount; i > 0; i--) {
-
-				v1 = buf.get(offset + v1_pos);
-				v1_pos++;
-				v2 = buf.get(offset + v1_pos);
-				v1_pos++;
-
-				if (v1 < 0) {
-					v1 += 256;
-				}
+			if (v2_count-- < 1) {
+				v2_count = buf.get(offset + v2_pos) - 1;
+				v2_pos++;
+				v2 = buf.get(offset + v2_pos);
+				v2_pos++;
 
 				if (v2 < 0) {
 					v2 += 256;
 				}
-
-				v1Min = Math.min(v1Min, v1);
-				v1Max = Math.max(v1Max, v1);
-
-				f = v1 / 256.0F;
-
-				// linear interpolation between neighboring palette entries
-				v = palette[v2 + 1] * f + palette[v2] * (1.0F - f);
-				if (v < 0.0F) {
-					v = 0.0F; // or 255 ...
-				}
-
-				matrixData[matrixDataPos] = v;
-				matrixDataPos++;
 			}
+
+			v1 = buf.get(offset + v1_pos);
+			v1_pos++;
+
+			if (v1 < 0) {
+				v1 += 256;
+			}
+
+			v1Min = Math.min(v1Min, v1);
+			v1Max = Math.max(v1Max, v1);
+
+			f = v1 / 256.0F;
+
+			// linear interpolation between neighboring palette entries
+			v = palette[v2 + 1] * f + palette[v2] * (1.0F - f);
+			if (v < 0.0F) {
+				v = 0.0F; // or 255 ...
+			}
+
+			matrixData[matrixDataPos] = v;
+			matrixDataPos++;
 		}
 
 		System.out.println("v1 min " + v1Min);
@@ -381,32 +430,14 @@ public class IrbImage {
 		return celsiusData;
 	}
 
-	private float[] readPalette(ByteBuffer buf, int offset) {
-		// save current buffer position
-		final int oldPos = buf.position();
-
-		float[] palette = new float[256];
-
-		buf.position(offset);
-		for (int i = 0; i < 256; ++i) {
-			palette[i] = buf.getFloat();
-		}
-
-		// restore old position
-		buf.position(oldPos);
-
-		return palette;
-	}
-
 	private static void checkIs(int expected, int val) {
 		if (expected != val) {
 			System.out.printf("expected %d but got %d\n", expected, val);
 		}
 	}
 
-	private static String readNullTerminatedString(ByteBuffer buf, int offset, int len) {
+	private static String readNullTerminatedString(ByteBuffer buf, int len) {
 		byte[] strBytes = new byte[len];
-		buf.position(offset);
 		buf.get(strBytes);
 		return new String(strBytes).trim();
 	}

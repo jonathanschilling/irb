@@ -212,13 +212,195 @@
       <note_colour>#FF7800</note_colour>
     </TAG>
     <TAG id="30">
-      <start_offset>621343</start_offset>
+      <start_offset>5217</start_offset>
       <end_offset>5216</end_offset>
-      <tag_text>IrbImage</tag_text>
+      <tag_text>bytePerPixel</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#865E3C</note_colour>
+    </TAG>
+    <TAG id="31">
+      <start_offset>5219</start_offset>
+      <end_offset>5218</end_offset>
+      <tag_text>compressed</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#1A5FB4</note_colour>
+    </TAG>
+    <TAG id="32">
+      <start_offset>5221</start_offset>
+      <end_offset>5220</end_offset>
+      <tag_text>width</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#26A269</note_colour>
+    </TAG>
+    <TAG id="33">
+      <start_offset>5223</start_offset>
+      <end_offset>5222</end_offset>
+      <tag_text>height</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#E5A50A</note_colour>
+    </TAG>
+    <TAG id="34">
+      <start_offset>5275</start_offset>
+      <end_offset>5216</end_offset>
+      <tag_text>IrbImage header</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#E01B24</note_colour>
+    </TAG>
+    <TAG id="35">
+      <start_offset>5276</start_offset>
+      <end_offset>6299</end_offset>
+      <tag_text>IrbImage palette</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#8FF0A4</note_colour>
+    </TAG>
+    <TAG id="36">
+      <start_offset>6300</start_offset>
+      <end_offset>6391</end_offset>
+      <tag_text>dummy1</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#62A0EA</note_colour>
+    </TAG>
+    <TAG id="37">
+      <start_offset>6300</start_offset>
+      <end_offset>6943</end_offset>
+      <tag_text>IrbImage metadata</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#F9F06B</note_colour>
+    </TAG>
+    <TAG id="38">
+      <start_offset>6395</start_offset>
+      <end_offset>6392</end_offset>
+      <tag_text>calibRangeMin</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#57E389</note_colour>
+    </TAG>
+    <TAG id="39">
+      <start_offset>6399</start_offset>
+      <end_offset>6396</end_offset>
+      <tag_text>calibRangeMax</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#FFA348</note_colour>
+    </TAG>
+    <TAG id="40">
+      <start_offset>6400</start_offset>
+      <end_offset>6441</end_offset>
+      <tag_text>dummy2</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#ED333B</note_colour>
+    </TAG>
+    <TAG id="41">
+      <start_offset>6442</start_offset>
+      <end_offset>6453</end_offset>
+      <tag_text>device</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#C061CB</note_colour>
+    </TAG>
+    <TAG id="42">
+      <start_offset>6454</start_offset>
+      <end_offset>6463</end_offset>
+      <tag_text>dummy3</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#B5835A</note_colour>
+    </TAG>
+    <TAG id="43">
+      <start_offset>6464</start_offset>
+      <end_offset>6479</end_offset>
+      <tag_text>deviceSerial</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#5E5C64</note_colour>
+    </TAG>
+    <TAG id="44">
+      <start_offset>6480</start_offset>
+      <end_offset>6501</end_offset>
+      <tag_text>dummy3a</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#3584E4</note_colour>
+    </TAG>
+    <TAG id="45">
+      <start_offset>6502</start_offset>
+      <end_offset>6533</end_offset>
+      <tag_text>optics</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#33D17A</note_colour>
+    </TAG>
+    <TAG id="46">
+      <start_offset>6534</start_offset>
+      <end_offset>6565</end_offset>
+      <tag_text>opticsResolution</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#F6D32D</note_colour>
+    </TAG>
+    <TAG id="47">
+      <start_offset>6566</start_offset>
+      <end_offset>6749</end_offset>
+      <tag_text>dummy4</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#FF7800</note_colour>
+    </TAG>
+    <TAG id="48">
+      <start_offset>6750</start_offset>
+      <end_offset>6765</end_offset>
+      <tag_text>opticsSerial</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#E01B24</note_colour>
+    </TAG>
+    <TAG id="49">
+      <start_offset>6766</start_offset>
+      <end_offset>6831</end_offset>
+      <tag_text>dummy5</tag_text>
       <font_colour>#000000</font_colour>
       <note_colour>#9141AC</note_colour>
     </TAG>
-    <TAG id="31">
+    <TAG id="50">
+      <start_offset>6835</start_offset>
+      <end_offset>6832</end_offset>
+      <tag_text>shortRangeStartErr</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#986A44</note_colour>
+    </TAG>
+    <TAG id="51">
+      <start_offset>6839</start_offset>
+      <end_offset>6836</end_offset>
+      <tag_text>shortRangeSize</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#DEDDDA</note_colour>
+    </TAG>
+    <TAG id="52">
+      <start_offset>6847</start_offset>
+      <end_offset>6840</end_offset>
+      <tag_text>timestamp</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#3D3846</note_colour>
+    </TAG>
+    <TAG id="53">
+      <start_offset>6851</start_offset>
+      <end_offset>6848</end_offset>
+      <tag_text>timestampMilliseconds</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#1C71D8</note_colour>
+    </TAG>
+    <TAG id="54">
+      <start_offset>6853</start_offset>
+      <end_offset>6852</end_offset>
+      <tag_text>dummyShort</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#2EC27E</note_colour>
+    </TAG>
+    <TAG id="55">
+      <start_offset>6854</start_offset>
+      <end_offset>6901</end_offset>
+      <tag_text>opticsText</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#F5C211</note_colour>
+    </TAG>
+    <TAG id="56">
+      <start_offset>6902</start_offset>
+      <end_offset>6943</end_offset>
+      <tag_text>dummy6</tag_text>
+      <font_colour>#000000</font_colour>
+      <note_colour>#E66100</note_colour>
+    </TAG>
+    <TAG id="57">
       <start_offset>621344</start_offset>
       <end_offset>621365</end_offset>
       <tag_text>TextInfo</tag_text>
