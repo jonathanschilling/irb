@@ -35,7 +35,6 @@ public class IrbHeaderBlock {
 	}
 
 	protected void readIrbHeader(ByteBuffer buf) {
-
 		final int initialPosition = buf.position();
 
 		final int blockTypeInt = buf.getInt();

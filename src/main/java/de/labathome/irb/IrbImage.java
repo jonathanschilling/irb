@@ -7,8 +7,6 @@ package de.labathome.irb;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
 import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.Locale;
@@ -17,13 +15,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 
-import aliceinnets.python.jyplot.JyPlot;
-
 public class IrbImage {
-
-	protected final Logger logger = System.getLogger(IrbImage.class.getName());
-
-	private static final int FLAGS_OFFSET = 1084;
+//	private static final int FLAGS_OFFSET = 1084;
 	public static final float CELSIUS_OFFSET = 273.15F;
 
 	@Expose(serialize = true)
@@ -106,42 +99,32 @@ public class IrbImage {
 
 	/**
 	 * Read the image data corresponding to this block.
-	 *
 	 * @param buf    buffer to read image from
-	 * @param offset
-	 * @param size
 	 */
-	public IrbImage(ByteBuffer buf, int offset, int size) {
-
-		// TODO next: remove offset and size from arg list of this constructor...
-
-
-		// save current buffer position
-		final int oldPos = buf.position();
-
-		logger.log(Level.DEBUG, "reading IrbImage starting at offset " + offset);
+	public static IrbImage readImage(ByteBuffer buf) {
+		IrbImage image = new IrbImage();
 
 		// read image data
-		buf.position(offset);
-		readImageHeader(buf); // 60 bytes fixed
+		image.readImageHeader(buf); // 60 bytes fixed
 		// at +60 bytes
 
-		int paletteOffset = 60; // ha, a match!
-		readPalette(buf, offset + paletteOffset); // 1024 bytes
+//		int paletteOffset = 60; // ha, a match!
+		image.readPalette(buf); // 1024 bytes
 		// now at +60 + +1024 == +1084 bytes
 
-		final int flagsPosition = offset + FLAGS_OFFSET; // offset + 1084 -> ha, a match!
-		readImageFlags(buf, flagsPosition); // 644 bytes
+//		final int flagsPosition = offset + FLAGS_OFFSET; // offset + 1084 -> ha, a match!
+		image.readImageMetadata(buf); // 644 bytes
 		// now at 60 + 1024 + 644 = 1728 bytes
 
 		// TODO: is this IrbHeaderBlock.headerSize ???
 		int bindataOffset = 0x6c0; // 1728 ???
-		boolean useCompression = (compressed != 0);
-		logger.log(Level.DEBUG, "use compression? " + useCompression);
-		readImageData(buf, offset, bindataOffset, width, height, useCompression);
+		if (image.compressed == 0) {
+			image.readImageDataUncompressed(buf);
+		} else {
+			image.readImageDataCompressed(buf, 0, bindataOffset, image.width, image.height);
+		}
 
-		// restore old position
-		buf.position(oldPos);
+		return image;
 	}
 
 	/**
@@ -153,16 +136,12 @@ public class IrbImage {
 		final int initialPosition = buf.position();
 
 		bytePerPixel = buf.getShort();
-		logger.log(Level.DEBUG, "bytePerPixel: " + bytePerPixel);
 
 		compressed = buf.getShort();
-		logger.log(Level.DEBUG, "compressed: " + compressed);
 
 		width = buf.getShort();
-		logger.log(Level.DEBUG, "width: " + width);
 
 		height = buf.getShort();
-		logger.log(Level.DEBUG, "height: " + height);
 
 		// don't know: always 0
 		final int var0 = buf.getInt();
@@ -191,7 +170,6 @@ public class IrbImage {
 		// don't know: always 0
 		// TODO: is -32768 for VARIOCAM, but 0 for oSaveIRB
 		final short var2 = buf.getShort();
-		logger.log(Level.DEBUG, "var2: " + var2);
 		checkIs(0, var2);
 
 		// don't know: always 0
@@ -199,13 +177,10 @@ public class IrbImage {
 		checkIs(0, var3);
 
 		emissivity = buf.getFloat();
-		logger.log(Level.DEBUG, "emissivity: " + emissivity);
 
 		distance = buf.getFloat();
-		logger.log(Level.DEBUG, "distance: " + distance);
 
 		environmentalTemp = buf.getFloat();
-		logger.log(Level.DEBUG, "environmentalTemp: " + environmentalTemp);
 
 		// don't know: always 0
 		final short var4 = buf.getShort();
@@ -215,11 +190,9 @@ public class IrbImage {
 		// TODO: is -32768 for VARIOCAM, oSaveIRB (from VARIOCAM_HD)
 		// --> 0x8000 as unsigned short ??? bit field ???
 		final short var5 = buf.getShort();
-		logger.log(Level.DEBUG, "var5: " + var5);
 		checkIs(0, var5);
 
 		pathTemperature = buf.getFloat();
-		logger.log(Level.DEBUG, "pathTemperature: " + pathTemperature);
 
 		// don't know: always 0x65 --> ASCII "e"
 		// TODO: is 0 for VARIOCAM
@@ -229,11 +202,9 @@ public class IrbImage {
 		// don't know: always 0
 		// TODO: is 16256 for VARIOCAM ??? bit field ???
 		final short var7 = buf.getShort();
-		logger.log(Level.DEBUG, "var7: " + var7);
 		checkIs(0, var7);
 
 		centerWavelength = buf.getFloat();
-		logger.log(Level.DEBUG, "centerWavelength: " + centerWavelength);
 
 		// don't know: always 0
 		final short var8 = buf.getShort();
@@ -264,46 +235,124 @@ public class IrbImage {
 		System.out.printf("header length so far is %d\n", headerLength); // 60 bytes
 	}
 
-	private void readImageFlags(ByteBuffer buf, int position) {
-		// save current buffer position
-		final int oldPos = buf.position();
-
-		calibRangeMin = buf.getFloat(position + 92);
-		calibRangeMax = buf.getFloat(position + 96);
-
-		device = readNullTerminatedString(buf, position + 142, 12);
-
-		opticsSerial = readNullTerminatedString(buf, position + 186, 16);
-		optics = readNullTerminatedString(buf, position + 202, 32);
-		opticsResolution = readNullTerminatedString(buf, position + 234, 32);
-
-		deviceSerial = readNullTerminatedString(buf, position + 450, 16);
-
-		shotRangeStartErr = buf.getFloat(position + 532);
-		shotRangeSize = buf.getFloat(position + 536);
-
-		timestampRaw = buf.getDouble(position + 540);
-		timestamp = fromDoubleToDateTime(timestampRaw);
-
-		timestampMillisecond = buf.getInt(position + 548);
-
-		opticsText = readNullTerminatedString(buf, position + 554, 48);
-
-		// restore old position
-		buf.position(oldPos);
+	/**
+	 * Read a fixed-size palette: 256 `float`s of 4 byte each
+	 * --> total length is 1024 bytes
+	 * @param buf
+	 * @param offset `offset` of image start, + paletteOffset == 60
+	 * @return
+	 */
+	private void readPalette(ByteBuffer buf) {
+		palette = new float[256];
+		for (int i = 0; i < 256; ++i) {
+			palette[i] = buf.getFloat();
+		}
 	}
 
 	/**
-	 *
+	 * Read image metadata. Fixed size of 644 bytes.
 	 * @param buf
-	 * @param offset - location where full image data block (incl header) starts
-	 * @param bindataOffset 0x6c0 == 1728
-	 * @param width 640 mostly
-	 * @param height 480 mostly
-	 * @param paletteOffset fixed at 60
-	 * @param useCompression true or false
 	 */
-	private void readImageData(ByteBuffer buf, int offset, int bindataOffset, int width, int height, boolean useCompression) {
+	private void readImageMetadata(ByteBuffer buf) {
+		final int initialPosition = buf.position();
+
+		// 0
+		byte[] dummy92 = new byte[92];
+		buf.get(dummy92);
+		// 92
+		calibRangeMin = buf.getFloat();
+		// 96
+		calibRangeMax = buf.getFloat();
+		// 100
+		byte[] dummy42 = new byte[42];
+		buf.get(dummy42);
+		// 142
+		device = readNullTerminatedString(buf, 12);
+		// 154
+		byte[] dummy32 = new byte[32];
+		buf.get(dummy32);
+		// 186
+		opticsSerial = readNullTerminatedString(buf, 16);
+		// 202
+		optics = readNullTerminatedString(buf, 32);
+		// 234
+		opticsResolution = readNullTerminatedString(buf, 32);
+		// 266
+		byte[] dummy184 = new byte[184];
+		buf.get(dummy184);
+		// 450
+		deviceSerial = readNullTerminatedString(buf, 16);
+		// 466
+		byte[] dummy66 = new byte[66];
+		buf.get(dummy66);
+		// 532
+		shotRangeStartErr = buf.getFloat();
+		// 536
+		shotRangeSize = buf.getFloat();
+		// 540
+		timestampRaw = buf.getDouble();
+		timestamp = fromDoubleToDateTime(timestampRaw);
+		// 548
+		timestampMillisecond = buf.getInt();
+		// 552
+		buf.getShort();
+		// 554
+		opticsText = readNullTerminatedString(buf, 48);
+		// 602
+		buf.get(dummy42);
+		// 644
+
+		if (buf.position() != initialPosition + 644) {
+			throw new RuntimeException("parsing image metadata does not add up");
+		}
+	}
+
+
+	/**
+	 * Read uncompressed image data.
+	 * @param buf buffer to read from
+	 */
+	private void readImageDataUncompressed(ByteBuffer buf) {
+		data = new float[height][width];
+
+		minData = Float.POSITIVE_INFINITY;
+		maxData = Float.NEGATIVE_INFINITY;
+
+		for (int y = 0; y < height; ++y) {
+			for (int x = 0; x < width; ++x) {
+
+				// scale / local position in palette entry
+				int v1 = buf.get();
+				if (v1 < 0) {
+					v1 += 256;
+				}
+
+				float f = v1 / 256.0F;
+
+				// index in palette
+				int v2 = buf.get();
+				if (v2 < 0) {
+					v2 += 256;
+				}
+
+				// linear interpolation between neighboring palette entries
+				// --> v is temperature in Kelvin
+				float v = palette[v2 + 1] * f + palette[v2] * (1.0F - f);
+				if (v < 0.0) {
+					// negative Kelvin temperatures are forbidden
+					v = 0.0F;
+				}
+
+				data[y][x] = v;
+
+				minData = Math.min(minData, data[y][x]);
+				maxData = Math.max(maxData, data[y][x]);
+			}
+		}
+	}
+
+
+	private void readImageDataCompressed(ByteBuffer buf, int offset, int bindataOffset, int width, int height) {
 
 		int dataSize = width * height;
 
@@ -328,100 +377,48 @@ public class IrbImage {
 		int v1Min = 1000;
 		int v1Max = -1000;
 
-		if (useCompression) {
-			// compression active: run-length encoding
+		// compression active: run-length encoding
+		for (int i = pixelCount; i > 0; i--) {
 
-			for (int i = pixelCount; i > 0; i--) {
+			if (v2_count-- < 1) {
+				// happens on first call and then again after v2_count (was read) pixels(?) have passed
+				// --> run-length encoding ???
 
-				if (v2_count-- < 1) {
-					// happens on first call and then again after v2_count (was read) pixels(?) have passed
-					// --> run-length encoding ???
-
-					v2_count = buf.get(offset + v2_pos) - 1;
-					v2_pos++;
-					v2 = buf.get(offset + v2_pos);
-					v2_pos++;
-
-					if (v2 < 0) {
-						// handle reading uint8_t
-						v2 += 256;
-					}
-				}
-
-				v1 = buf.get(offset + v1_pos);
-				v1_pos++;
-
-				if (v1 < 0) {
-					// handle reading uint8_t
-					v1 += 256;
-				}
-
-				v1Min = Math.min(v1Min, v1);
-				v1Max = Math.max(v1Max, v1);
-
-				f = v1 / 256.0F;
-
-				// linear interpolation between neighboring palette entries
-				v = palette[v2 + 1] * f + palette[v2] * (1.0F - f);
-				if (v < 0.0F) {
-					// negative Kelvin temperatures are forbidden?
-					v = 0.0F; // or 255 ...
-				}
-
-				matrixData[matrixDataPos] = v;
-				matrixDataPos++;
-			}
-		} else {
-			logger.log(Level.DEBUG, "start reading image at offset " + (offset + v1_pos));
-
-			// no compression
-			for (int i = pixelCount; i > 0; i--) {
-
-				// v1 is used to compute f, which represents a fraction in [0, 1[
-				v1 = buf.get(offset + v1_pos);
-				v1_pos++;
-
-				// v2 seems to be the index of the current interval in the palette
-				// -> for a fixed palette, we thus expect every second byte of an image to be the same value
-				v2 = buf.get(offset + v1_pos);
-				v1_pos++;
-
-				if (v1 < 0) {
-					// handle reading uint8_t -> make v1 be in range 0 ... 255
-					v1 += 256;
-				}
+				v2_count = buf.get(offset + v2_pos) - 1;
+				v2_pos++;
+				v2 = buf.get(offset + v2_pos);
+				v2_pos++;
 
 				if (v2 < 0) {
-					// handle reading uint8_t -> make v2 be in range 0 ... 255
+					// handle reading uint8_t
 					v2 += 256;
 				}
-
-				if (i == pixelCount) {
-					System.out.println("v2 = " + v2); // 0x72 == 114
-				}
-
-				// keep track of min/max occuring values for v1
-				// --> seems to actually use full range 0 to 255!
-				// --> and then palette entry is used to re-scale to actual temperature range...?
-				v1Min = Math.min(v1Min, v1);
-				v1Max = Math.max(v1Max, v1);
-
-				// fraction between 0 and 1
-				// specifically, v1 can be 0 ... 255
-				// --> i / 256 goes from 0 to just below 1
-				f = v1 / 256.0F;
-
-				// linear interpolation between neighboring palette entries
-				v = palette[v2 + 1] * f + palette[v2] * (1.0F - f);
-				if (v < 0.0F) {
-					// negative Kelvin temperatures are forbidden?
-					v = 0.0F; // or 255 ...
-				}
-
-				matrixData[matrixDataPos] = v;
-				matrixDataPos++;
 			}
+
+			v1 = buf.get(offset + v1_pos);
+			v1_pos++;
+
+			if (v1 < 0) {
+				// handle reading uint8_t
+				v1 += 256;
+			}
+
+			v1Min = Math.min(v1Min, v1);
+			v1Max = Math.max(v1Max, v1);
+
+			f = v1 / 256.0F;
+
+			// linear interpolation between neighboring palette entries
+			v = palette[v2 + 1] * f + palette[v2] * (1.0F - f);
+			if (v < 0.0F) {
+				// negative Kelvin temperatures are forbidden?
+				v = 0.0F; // or 255 ...
+			}
+
+			matrixData[matrixDataPos] = v;
+			matrixDataPos++;
 		}
+
 
 		System.out.println("v1 min " + v1Min);
 		System.out.println("v1 max " + v1Max);
@@ -443,6 +440,7 @@ public class IrbImage {
 		System.out.println("data max: " + maxData);
 	}
 
+
 	/**
 	 * Get image in deg. Celsius
 	 *
@@ -458,37 +456,14 @@ public class IrbImage {
 		return celsiusData;
 	}
 
-	/**
-	 * Read a fixed-size palette: 256 `float`s of 4 byte each
-	 * --> total length is 1024 bytes
-	 * @param buf
-	 * @param offset `offset` of image start, + paletteOffset == 60
-	 * @return
-	 */
-	private void readPalette(ByteBuffer buf, int offset) {
-		// save current buffer position
-		final int oldPos = buf.position();
-
-		palette = new float[256];
-
-		buf.position(offset);
-		for (int i = 0; i < 256; ++i) {
-			palette[i] = buf.getFloat();
-		}
-
-		// restore old position
-		buf.position(oldPos);
-	}
-
 	private static void checkIs(int expected, int val) {
 		if (expected != val) {
 			System.out.printf("expected %d but got %d\n", expected, val);
 		}
 	}
 
-	private static String readNullTerminatedString(ByteBuffer buf, int offset, int len) {
+	private static String readNullTerminatedString(ByteBuffer buf, int len) {
 		byte[] strBytes = new byte[len];
-		buf.position(offset);
 		buf.get(strBytes);
 		return new String(strBytes).trim();
 	}
