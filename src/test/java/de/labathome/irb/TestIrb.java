@@ -79,7 +79,7 @@ public class TestIrb {
 			Assertions.assertEquals(233.0F, image.calibRangeMin);
 			Assertions.assertEquals(393.0F, image.calibRangeMax);
 			Assertions.assertEquals("VARIOCAM", image.device);
-			Assertions.assertEquals("", image.deviceSerial);
+			Assertions.assertEquals("5020", image.deviceSerial);
 			Assertions.assertEquals("VarioCAM II standard optics", image.optics);
 			Assertions.assertEquals("IR 1.0/30 LW", image.opticsResolution);
 			Assertions.assertEquals("4001_275213", image.opticsSerial);
