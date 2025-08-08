@@ -121,7 +121,7 @@ public class IrbFile {
 				break;
 			case EMPTY:
 				if (block.offset != 0 || block.size != 0) {
-					throw new RuntimeException("non-empty EMPTY block? offset=" + block.offset + " size=" + block.size);
+					System.out.println("non-empty EMPTY block? offset=" + block.offset + " size=" + block.size);
 				}
 				// ignore
 				break;
