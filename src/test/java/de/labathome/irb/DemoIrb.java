@@ -90,6 +90,11 @@ public class DemoIrb {
 //		final String filename = folder + "Sequences/Single file/lp14.irb"; // ERROR !!!
 //		final String filename = folder + "Sequences/Single file/lp15.irb"; // ERROR !!!
 
+		// Provided by David Jessop
+//		final String filename = folder + "AD071802.irb"; // single image; has non-empty EMPTY block
+//		final String filename = folder + "AC032701.irb"; // video?
+
+
 		IrbFile irbFile = IrbFile.fromFile(filename);
 
 		for (IrbTextInfo textInfo: irbFile.textInfos) {
@@ -103,9 +108,9 @@ public class DemoIrb {
 		int imageIndex = 0;
 		for (IrbImage image: irbFile.images) {
 	        plt.figure();
-	        plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('jet')");
-	        // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('gist_ncar')");
-	        // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('nipy_spectral')");
+	        plt.imshow(image.getCelsiusImage(), "cmap='jet'");
+//	        plt.imshow(image.getCelsiusImage(), "cmap='gist_ncar'");
+//	        plt.imshow(image.getCelsiusImage(), "cmap='nipy_spectral'");
 	        plt.colorbar();
 	        plt.title(String.format("image %d", imageIndex));
 
@@ -120,9 +125,9 @@ public class DemoIrb {
 				int imageInFrame = 0;
 				for (IrbImage image: frame.images) {
 			        plt.figure();
-			        plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('jet')");
-			        // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('gist_ncar')");
-			        // plt.imshow(image.getCelsiusImage(), "cmap=plt.get_cmap('nipy_spectral')");
+			        plt.imshow(image.getCelsiusImage(), "cmap='jet'");
+//			        plt.imshow(image.getCelsiusImage(), "cmap='gist_ncar'");
+//			        plt.imshow(image.getCelsiusImage(), "cmap='nipy_spectral'");
 			        plt.colorbar();
 			        plt.title(String.format("frame %d, image %d", frameIdx, imageInFrame));
 
