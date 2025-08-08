@@ -6,7 +6,7 @@ inspired by https://github.com/tomsoftware/Irbis-File-Format .
 This program can be used either as a Maven dependency within another program
 or as a stand-alone commandline utility.  
 The ready-to-use jar can be downloaded here:
-[irb-1.1.0.jar](https://github.com/jonathanschilling/irb/releases/download/v1.1.0/irb-1.1.0.jar)
+[irb-1.1.1.jar](https://github.com/jonathanschilling/irb/releases/download/v1.1.1/irb-1.1.1.jar)
 
 ## Legal disclaimer
 
@@ -25,9 +25,11 @@ Please inform the author about possible legal issues before turning to a lawyer.
 > mvn clean package
 ```
 
-The output will be at `target/irb-1.1.0.jar`.
+The output will be at `target/irb-1.1.1.jar`.
 
 ## Use as a Maven dependency
+
+[FIXME: The latest released version on Maven Central is still `1.0.3`.]
 
 You can include this project as a dependency in Maven:
 
@@ -35,11 +37,9 @@ You can include this project as a dependency in Maven:
 <dependency>
     <groupId>de.labathome</groupId>
     <artifactId>irb</artifactId>
-    <version>1.0.3</version>
+    <version>1.1.1</version>
 </dependency>
 ```
-
-FIXME: The latest released version on Maven Central is still `1.0.3`.
 
 ## Command-line Usage
 
@@ -52,13 +52,13 @@ Run-time dependencies for use with JyPlot:
 Execute the jar with the `*.irb` file as first command line argument:
  
 ```bash
-> java -jar irb-1.1.0.jar AB020300.irb
+> java -jar irb-1.1.1.jar AB020300.irb
 ```
 
 It can also be run in headless mode, where no attempt will be made to plot the image using JyPlot:
 
 ```bash
-> java -jar irb-1.1.0.jar --headless AB020300.irb
+> java -jar irb-1.1.1.jar --headless AB020300.irb
 ```
 
 This will generate two text output files and a direct PNG equivalent of the data:
