@@ -60,7 +60,7 @@ public class IrbHeaderBlock {
 		dword8 = buf.getInt();
 		//32
 
-//		System.out.printf("# IrbHeaderBlock blockType=%s [%d] frameIndex=%d offset=%d size=%d\n", blockType.toString(), blockType.value(), frameIndex, offset, size);
+		System.out.printf("# IrbHeaderBlock blockType=%s [%d] frameIndex=%d offset=%d size=%d\n", blockType.toString(), blockType.value(), frameIndex, offset, size);
 
 		if (buf.position() - initialPosition != 32) {
 			throw new RuntimeException("byte counting error in parsing of IrbHeaderBlock");

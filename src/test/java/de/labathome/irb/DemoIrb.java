@@ -40,7 +40,7 @@ public class DemoIrb {
 //		final String filename = folder + "140203AA/AA020303.irb";
 //		final String filename = folder + "140203AA/AA020304.irb";
 
-		final String filename = folder + "140203AB/AB020300.irb";
+//		final String filename = folder + "140203AB/AB020300.irb";
 //		final String filename = folder + "140203AB/AB020301.irb";
 //		final String filename = folder + "140203AB/AB020302.irb";
 
@@ -92,7 +92,7 @@ public class DemoIrb {
 
 		// Provided by David Jessop
 //		final String filename = folder + "AD071802.irb"; // single image; has non-empty EMPTY block
-//		final String filename = folder + "AC032701.irb"; // video?
+		final String filename = folder + "AC032701.irb"; // video?
 
 
 		IrbFile irbFile = IrbFile.fromFile(filename);

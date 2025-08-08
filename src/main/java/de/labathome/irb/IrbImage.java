@@ -113,7 +113,7 @@ public class IrbImage {
 
 		final int expectedSize;
 		if (isVideoFrameFirstRead) {
-			// only IrbImage header in first occurence
+			// only IrbImage header in first occurrence
 			// -->  IrbImage header (60 bytes)
 			//      IrbImage palette (1024 bytes)
 			//      IrbImage metadata (644 bytes)
@@ -147,6 +147,8 @@ public class IrbImage {
 		if (isVideoFrameFirstRead) {
 			return;
 		}
+
+		System.out.println("compressed=" + compressed);
 
 		if (compressed == 0) {
 			readImageDataUncompressed(buf);
@@ -241,6 +243,8 @@ public class IrbImage {
 		short var13 = buf.getShort();
 		checkIs(0x101, var13);
 
+		System.out.printf("# IrbImage header: bytesPerPixel=%d compressed=%d width=%d height=%d\n", bytesPerPixel, compressed, width, height);
+
 		if (width > 10000 || height > 10000) {
 			System.out.printf("error: width (%d) or height (%d) out-of-range!\n", width, height);
 			width = 1;
@@ -288,12 +292,12 @@ public class IrbImage {
 		// 234
 		opticsResolution = readNullTerminatedString(buf, 32);
 		// 266
-		byte[] dummy4 = new byte[184];
+		byte[] dummy4 = new byte[184]; // FIXME: likely swapped with opticsSerial
 		buf.get(dummy4);
 		// 450
 		opticsSerial = readNullTerminatedString(buf, 16);
 		// 466
-		byte[] dummy5 = new byte[66];
+		byte[] dummy5 = new byte[66]; // might contain some sort of version number at the start?
 		buf.get(dummy5);
 		// 532
 		shotRangeStartErr = buf.getFloat();
@@ -367,81 +371,75 @@ public class IrbImage {
 		// starting from beginning of IrbImage...
 		int offset = 0;
 
-		int dataSize = width * height;
-
-		int pixelCount = dataSize;
-		float[] matrixData = new float[pixelCount];
-
-		int matrixDataPos = 0;
+		int pixelCount = width * height;
 
 		int v1_pos = 1728;
 
 		// used if data is compressed
-		int v2_pos = v1_pos + pixelCount;
-
-		int v1 = 0;
-		int v2 = 0;
-
 		int v2_count = 0;
-		float v = 0.0F;
-
-		float f;
+		int v2_pos = v1_pos + pixelCount;
+		int v2 = 0;
 
 		int v1Min = 1000;
 		int v1Max = -1000;
 
-		// compression active: run-length encoding
+		data = new float[height][width];
+		minData = Float.POSITIVE_INFINITY;
+		maxData = Float.NEGATIVE_INFINITY;
 
-		for (int i = pixelCount; i > 0; i--) {
+		// compression type: palette index is grouped for a number of consecutive pixels
+		for (int y = 0; y < height; ++y) {
+			for (int x = 0; x < width; ++x) {
 
-			if (v2_count-- < 1) {
-				v2_count = buf.get(offset + v2_pos) - 1;
-				v2_pos++;
-				v2 = buf.get(offset + v2_pos);
-				v2_pos++;
+				if (v2_count-- < 1) {
+					// number of consecutive pixels that use the same palette index
+					v2_count = buf.get(offset + v2_pos) - 1;
+					v2_pos++;
 
-				if (v2 < 0) {
-					v2 += 256;
+					// palette index to use for current set of pixels
+					v2 = buf.get(offset + v2_pos);
+					v2_pos++;
+
+					if (v2 < 0) {
+						v2 += 256;
+					}
 				}
+
+				int v1 = buf.get(offset + v1_pos);
+				v1_pos++;
+
+				if (v1 < 0) {
+					v1 += 256;
+				}
+
+				v1Min = Math.min(v1Min, v1);
+				v1Max = Math.max(v1Max, v1);
+
+				float f = v1 / 256.0F;
+
+				// linear interpolation between neighboring palette entries
+				final float upper_palette_entry;
+				if (v2 < 255) {
+					upper_palette_entry = palette[v2 + 1];
+				} else {
+					upper_palette_entry = palette[palette.length - 1];
+				}
+				final float lower_palette_entry = palette[v2];
+				float v = upper_palette_entry * f + lower_palette_entry * (1.0F - f);
+
+				if (v < 0.0F) {
+					v = 0.0F; // or 255 ...
+				}
+
+				minData = Math.min(minData, v);
+				maxData = Math.max(maxData, v);
+
+				data[y][x] = v;
 			}
-
-			v1 = buf.get(offset + v1_pos);
-			v1_pos++;
-
-			if (v1 < 0) {
-				v1 += 256;
-			}
-
-			v1Min = Math.min(v1Min, v1);
-			v1Max = Math.max(v1Max, v1);
-
-			f = v1 / 256.0F;
-
-			// linear interpolation between neighboring palette entries
-			v = palette[v2 + 1] * f + palette[v2] * (1.0F - f);
-			if (v < 0.0F) {
-				v = 0.0F; // or 255 ...
-			}
-
-			matrixData[matrixDataPos] = v;
-			matrixDataPos++;
 		}
 
 		System.out.println("v1 min " + v1Min);
 		System.out.println("v1 max " + v1Max);
-
-		minData = Float.POSITIVE_INFINITY;
-		maxData = Float.NEGATIVE_INFINITY;
-
-		data = new float[height][width];
-		for (int i = 0; i < pixelCount; ++i) {
-			final int row = i / width;
-			final int col = i % width;
-			data[row][col] = matrixData[i];
-
-			minData = Math.min(minData, matrixData[i]);
-			maxData = Math.max(maxData, matrixData[i]);
-		}
 
 		System.out.println("data min: " + minData);
 		System.out.println("data max: " + maxData);
