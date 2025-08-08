@@ -28,4 +28,8 @@ public enum IrbBlockType {
 		}
 		return null;
 	}
+
+	public int value() {
+		return value;
+	}
 }
