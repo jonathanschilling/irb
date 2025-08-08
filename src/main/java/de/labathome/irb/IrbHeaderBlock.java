@@ -28,7 +28,6 @@ public class IrbHeaderBlock {
 		final int blockTypeInt = buf.getInt();
 		// 4
 		blockType = IrbBlockType.fromInt(blockTypeInt);
-//		System.out.printf("found block: %s\n", blockType);
 
 		dword2 = buf.getInt();
 		// 8
@@ -60,6 +59,8 @@ public class IrbHeaderBlock {
 		// 28
 		dword8 = buf.getInt();
 		//32
+
+//		System.out.printf("# IrbHeaderBlock blockType=%s [%d] frameIndex=%d offset=%d size=%d\n", blockType.toString(), blockType.value(), frameIndex, offset, size);
 
 		if (buf.position() - initialPosition != 32) {
 			throw new RuntimeException("byte counting error in parsing of IrbHeaderBlock");

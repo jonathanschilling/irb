@@ -55,6 +55,8 @@ public class IrbFileHeader {
 		buf.get(dummy);
 		// 64
 
+//		System.out.printf("# IrbFileHeader: fileType=%s blockOffset=%d blockCount=%d\n", fileType.toString(), blockOffset, blockCount);
+
 		if (buf.position() - initialPosition != 64) {
 			throw new RuntimeException("byte counting error in parsing of IrbFileHeader");
 		}
