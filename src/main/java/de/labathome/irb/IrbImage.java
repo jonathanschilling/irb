@@ -151,6 +151,8 @@ public class IrbImage {
 		if (compressed == 0) {
 			readImageDataUncompressed(buf);
 		} else {
+			System.out.printf("compression type: %d\n", compressed);
+
 			readImageDataCompressed(buf);
 		}
 	}

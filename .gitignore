@@ -29,3 +29,8 @@ hs_err_pid*
 *.dat
 *.json
 *Zone.Identifier
+
+*.irb
+*.IRB
+
+*.png
