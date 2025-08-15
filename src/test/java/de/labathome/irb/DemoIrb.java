@@ -93,6 +93,7 @@ public class DemoIrb {
 		// Provided by David Jessop
 //		final String filename = folder + "AD071802.irb"; // single image; has non-empty EMPTY block
 //		final String filename = folder + "AC032701.irb"; // video?
+//		final String filename = folder + "AA022000.irb"; // single shot, old format, includes mystery block
 
 
 		IrbFile irbFile = IrbFile.fromFile(filename);

@@ -101,32 +101,41 @@ public class IrbFile {
 		irb.headers = new LinkedList<>();
 		for (IrbHeaderBlock block : irb.headerBlocks) {
 			switch (block.blockType) {
-			case IMAGE:
-				IrbImage image = IrbImage.controlledRead(buf, initialPosition + block.offset, block.size, /*isVideoFrameFirstRead=*/isVideoFrame);
-				if (!isVideoFrame) {
-					irb.images.add(image);
-				}
-				break;
-			case PREVIEW:
-				IrbPreview preview = new IrbPreview(buf, initialPosition + block.offset, block.size);
-				irb.previews.add(preview);
-				break;
-			case TEXT_INFO:
-				IrbTextInfo textInfo = new IrbTextInfo(buf, initialPosition + block.offset, block.size);
-				irb.textInfos.add(textInfo);
-				break;
-			case HEADER:
-				IrbHeader header = IrbHeader.controlledRead(buf, initialPosition + block.offset, block.size);
-				irb.headers.add(header);
-				break;
-			case EMPTY:
+			case EMPTY: // 0
 				if (block.offset != 0 || block.size != 0) {
 					System.out.println("non-empty EMPTY block? offset=" + block.offset + " size=" + block.size);
 				}
 				// ignore
 				break;
+			case IMAGE: // 1
+				IrbImage image = IrbImage.controlledRead(buf, initialPosition + block.offset, block.size, /*isVideoFrameFirstRead=*/isVideoFrame);
+				if (!isVideoFrame) {
+					irb.images.add(image);
+				}
+				break;
+			case PREVIEW: // 2
+				IrbPreview preview = new IrbPreview(buf, initialPosition + block.offset, block.size);
+				irb.previews.add(preview);
+				break;
+			case TEXT_INFO: // 3
+				IrbTextInfo textInfo = new IrbTextInfo(buf, initialPosition + block.offset, block.size);
+				irb.textInfos.add(textInfo);
+				break;
+			case HEADER: // 4
+				IrbHeader header = IrbHeader.controlledRead(buf, initialPosition + block.offset, block.size);
+				irb.headers.add(header);
+				break;
+			case TODO_MYSTERY_5: // 5
+				System.out.println("TODO: mystery block 5 - ignored for now");
+				break;
+			case TODO_MYSTERY_6: // 6
+				System.out.println("TODO: mystery block 6 - ignored for now");
+				break;
+			case AUDIO: // 7
+				System.out.println("TODO: AUDIO block - ignored for now");
+				break;
 			default:
-				throw new RuntimeException("block not implemented yet:" + block.blockType);
+				throw new RuntimeException("block not implemented yet: " + block.blockType);
 			}
 		}
 

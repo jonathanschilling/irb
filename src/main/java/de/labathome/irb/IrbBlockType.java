@@ -13,6 +13,8 @@ public enum IrbBlockType {
 	PREVIEW(2),
 	TEXT_INFO(3),
 	HEADER(4),
+	TODO_MYSTERY_5(5),
+	TODO_MYSTERY_6(6),
 	AUDIO(7);
 
 	private IrbBlockType(int value) {
@@ -26,7 +28,7 @@ public enum IrbBlockType {
 				return t;
 			}
 		}
-		return null;
+		throw new RuntimeException(String.format("unknown block type: %d", val));
 	}
 
 	public int value() {
