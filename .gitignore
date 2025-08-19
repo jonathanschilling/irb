@@ -33,4 +33,7 @@ hs_err_pid*
 *.irb
 *.IRB
 
+# wxHexEditor tag files
+*.irb.tags
+
 *.png
