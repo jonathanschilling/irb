@@ -9,6 +9,10 @@ import java.nio.ByteBuffer;
 
 public class IrbHeader {
 
+	private byte[] dummy;
+
+	private IrbHeader() { }
+
 	/**
 	 * Read a HEADER data blob.
 	 *
@@ -16,12 +20,15 @@ public class IrbHeader {
 	 * @param offset
 	 * @param size
 	 */
-	public static IrbHeader controlledRead(ByteBuffer buf, int offset, int size) {
-		buf.position(offset);
+	public static IrbHeader fromBuffer(ByteBuffer buf, int offset, int size) {
+		IrbHeader header = new IrbHeader();
 
+		buf.position(offset);
 		final int initialPosition = buf.position();
 
-		IrbHeader header = new IrbHeader(buf, size);
+		// TODO: implement parsing HEADER data
+		header.dummy = new byte[size];
+		buf.get(header.dummy);
 
 		if (buf.position() - initialPosition != size) {
 			throw new RuntimeException("byte counting error in reading of IrbHeader; expected " + size + " but read " + (buf.position() - initialPosition));
@@ -30,9 +37,4 @@ public class IrbHeader {
 		return header;
 	}
 
-	public IrbHeader(ByteBuffer buf, int size) {
-		// TODO: implement parsing HEADER data
-		byte[] dummy = new byte[size];
-		buf.get(dummy);
-	}
 }

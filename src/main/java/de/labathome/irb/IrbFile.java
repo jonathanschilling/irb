@@ -84,13 +84,13 @@ public class IrbFile {
 
 		IrbFile irb = new IrbFile();
 
-		irb.header = new IrbFileHeader(buf);
+		irb.header = IrbFileHeader.fromBuffer(buf);
 
 		// read header blocks
 		irb.headerBlocks = new LinkedList<>();
 		buf.position(initialPosition + irb.header.blockOffset);
 		for (int i = 0; i < irb.header.blockCount; ++i) {
-			IrbHeaderBlock headerBlock = new IrbHeaderBlock(buf);
+			IrbHeaderBlock headerBlock = IrbHeaderBlock.fromBuffer(buf);
 			irb.headerBlocks.add(headerBlock);
 		}
 
@@ -108,21 +108,21 @@ public class IrbFile {
 				// ignore
 				break;
 			case IMAGE: // 1
-				IrbImage image = IrbImage.controlledRead(buf, initialPosition + block.offset, block.size, /*isVideoFrameFirstRead=*/isVideoFrame);
+				IrbImage image = IrbImage.fromBuffer(buf, initialPosition + block.offset, block.size, /*isVideoFrameFirstRead=*/isVideoFrame);
 				if (!isVideoFrame) {
 					irb.images.add(image);
 				}
 				break;
 			case PREVIEW: // 2
-				IrbPreview preview = new IrbPreview(buf, initialPosition + block.offset, block.size);
+				IrbPreview preview = IrbPreview.fromBuffer(buf, initialPosition + block.offset, block.size);
 				irb.previews.add(preview);
 				break;
 			case TEXT_INFO: // 3
-				IrbTextInfo textInfo = new IrbTextInfo(buf, initialPosition + block.offset, block.size);
+				IrbTextInfo textInfo = IrbTextInfo.fromBuffer(buf, initialPosition + block.offset, block.size);
 				irb.textInfos.add(textInfo);
 				break;
 			case HEADER: // 4
-				IrbHeader header = IrbHeader.controlledRead(buf, initialPosition + block.offset, block.size);
+				IrbHeader header = IrbHeader.fromBuffer(buf, initialPosition + block.offset, block.size);
 				irb.headers.add(header);
 				break;
 			case TODO_MYSTERY_5: // 5
@@ -141,7 +141,7 @@ public class IrbFile {
 
 		if (isVideoFrame && buf.remaining() > 0) {
 			// expect an IMAGE header block
-			IrbHeaderBlock imageHeaderBlock = new IrbHeaderBlock(buf);
+			IrbHeaderBlock imageHeaderBlock = IrbHeaderBlock.fromBuffer(buf);
 			if (imageHeaderBlock.blockType != IrbBlockType.IMAGE) {
 				throw new RuntimeException("expecting IMAGE header block, but got " + imageHeaderBlock.blockType);
 			}
@@ -149,7 +149,7 @@ public class IrbFile {
 //			System.out.println("  frame index: " + imageHeaderBlock.frameIndex);
 
 			// expect a HEADER header block
-			IrbHeaderBlock headerHeaderBlock = new IrbHeaderBlock(buf);
+			IrbHeaderBlock headerHeaderBlock = IrbHeaderBlock.fromBuffer(buf);
 			if (headerHeaderBlock.blockType != IrbBlockType.HEADER) {
 				throw new RuntimeException("expecting HEADER header block, but got " + headerHeaderBlock.blockType);
 			}

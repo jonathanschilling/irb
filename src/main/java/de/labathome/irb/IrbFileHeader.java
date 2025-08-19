@@ -21,11 +21,11 @@ public class IrbFileHeader {
 	public int blockCount;
 	public int blockOffset;
 
-	public IrbFileHeader(ByteBuffer buf) {
-		parseHeader(buf);
-	}
+	private IrbFileHeader() { }
 
-	private void parseHeader(ByteBuffer buf) {
+	public static IrbFileHeader fromBuffer(ByteBuffer buf) {
+		IrbFileHeader header = new IrbFileHeader();
+
 		final int initialPosition = buf.position();
 
 		// parse magic number ID
@@ -40,16 +40,16 @@ public class IrbFileHeader {
 		final byte[] fileTypeBytes = new byte[8];
 		buf.get(fileTypeBytes);
 		// 13
-		fileType = IrbFileType.fromString(new String(fileTypeBytes));
+		header.fileType = IrbFileType.fromString(new String(fileTypeBytes));
 
 		// second file type identifier; gets ignored
 		buf.get(fileTypeBytes);
 		// 21
-		flag1 = buf.getInt();
+		header.flag1 = buf.getInt();
 		// 25
-		blockOffset = buf.getInt();
+		header.blockOffset = buf.getInt();
 		// 29
-		blockCount = buf.getInt();
+		header.blockCount = buf.getInt();
 		// 33
 		byte[] dummy = new byte[31];
 		buf.get(dummy);
@@ -60,5 +60,7 @@ public class IrbFileHeader {
 		if (buf.position() - initialPosition != 64) {
 			throw new RuntimeException("byte counting error in parsing of IrbFileHeader");
 		}
+
+		return header;
 	}
 }

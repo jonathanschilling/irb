@@ -104,7 +104,7 @@ public class IrbImage {
 	 * @param offset
 	 * @param size
 	 */
-	public static IrbImage controlledRead(ByteBuffer buf, int offset, int size, boolean isVideoFrameFirstRead) {
+	public static IrbImage fromBuffer(ByteBuffer buf, int offset, int size, boolean isVideoFrameFirstRead) {
 		buf.position(offset);
 
 		final int initialPosition = buf.position();

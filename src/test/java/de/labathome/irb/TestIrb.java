@@ -31,7 +31,7 @@ public class TestIrb {
 			// although they actually read little endian!
 			buf.order(ByteOrder.LITTLE_ENDIAN);
 
-			IrbFileHeader header = new IrbFileHeader(buf);
+			IrbFileHeader header = IrbFileHeader.fromBuffer(buf);
 			Assertions.assertEquals(IrbFileType.VARIOCAM, header.fileType);
 			Assertions.assertEquals(64, header.blockOffset);
 			Assertions.assertEquals(10, header.blockCount);
@@ -42,7 +42,7 @@ public class TestIrb {
 
 			for (int headerBlockIdx = 0; headerBlockIdx < header.blockCount; ++headerBlockIdx) {
 				final int posBeforeHeaderBlock = buf.position();
-				IrbHeaderBlock headerBlock = new IrbHeaderBlock(buf);
+				IrbHeaderBlock headerBlock = IrbHeaderBlock.fromBuffer(buf);
 				Assertions.assertEquals(32, buf.position() - posBeforeHeaderBlock);
 
 				// store for later
@@ -72,7 +72,7 @@ public class TestIrb {
 
 			// --------------
 
-			IrbImage image = IrbImage.controlledRead(buf, headerBlocks[0].offset, headerBlocks[0].size, false);
+			IrbImage image = IrbImage.fromBuffer(buf, headerBlocks[0].offset, headerBlocks[0].size, false);
 
 			// image header
 			Assertions.assertEquals(2, image.bytesPerPixel);
@@ -107,14 +107,14 @@ public class TestIrb {
 
 			// --------------
 
-			IrbPreview preview = new IrbPreview(buf, headerBlocks[1].offset, headerBlocks[1].size);
+			IrbPreview preview = IrbPreview.fromBuffer(buf, headerBlocks[1].offset, headerBlocks[1].size);
 
 			// further tests missing for now...
 			Assertions.assertNotNull(preview);
 
 			// --------------
 
-			IrbTextInfo textInfo = new IrbTextInfo(buf, headerBlocks[2].offset, headerBlocks[2].size);
+			IrbTextInfo textInfo = IrbTextInfo.fromBuffer(buf, headerBlocks[2].offset, headerBlocks[2].size);
 
 			Assertions.assertEquals("[Settings]\r\nRMI=PPP1\r\n", textInfo.textInfo);
 		}
