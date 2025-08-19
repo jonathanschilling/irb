@@ -75,7 +75,7 @@ public class IrbFile {
 		return irb;
 	}
 
-	public static IrbFile read(ByteBuffer buf, boolean isVideoFrame) {
+	public static IrbFile read(ByteBuffer buf, boolean isVideoFrameFirstRead) {
 		final int initialPosition = buf.position();
 
 		// NOTE: in irbis-file-format, the routines are named readIntBE,
@@ -108,8 +108,8 @@ public class IrbFile {
 				// ignore
 				break;
 			case IMAGE: // 1
-				IrbImage image = IrbImage.fromBuffer(buf, initialPosition + block.offset, block.size, /*isVideoFrameFirstRead=*/isVideoFrame);
-				if (!isVideoFrame) {
+				IrbImage image = IrbImage.fromBuffer(buf, initialPosition + block.offset, block.size, isVideoFrameFirstRead);
+				if (!isVideoFrameFirstRead) {
 					irb.images.add(image);
 				}
 				break;
@@ -139,7 +139,7 @@ public class IrbFile {
 			}
 		}
 
-		if (isVideoFrame && buf.remaining() > 0) {
+		if (isVideoFrameFirstRead && buf.remaining() > 0) {
 			// expect an IMAGE header block
 			IrbHeaderBlock imageHeaderBlock = IrbHeaderBlock.fromBuffer(buf);
 			if (imageHeaderBlock.blockType != IrbBlockType.IMAGE) {

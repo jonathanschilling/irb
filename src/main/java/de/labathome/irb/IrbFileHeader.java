@@ -18,8 +18,11 @@ public class IrbFileHeader {
 	@SuppressWarnings("unused")
 	private int flag1;
 
-	public int blockCount;
+	/** 64 */
 	public int blockOffset;
+
+	/** 10 */
+	public int blockCount;
 
 	private IrbFileHeader() { }
 

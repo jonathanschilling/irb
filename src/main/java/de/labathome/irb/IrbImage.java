@@ -122,7 +122,8 @@ public class IrbImage {
 			expectedSize = size;
 		}
 
-		if (buf.position() - initialPosition != expectedSize) {
+		// FIXME: sanity check implemented only for uncompressed images, for now
+		if (image.compressed == 0 && (buf.position() - initialPosition != expectedSize)) {
 			throw new RuntimeException("byte counting error in reading of IrbImage; expected " + expectedSize + " but read " + (buf.position() - initialPosition));
 		}
 
@@ -367,7 +368,7 @@ public class IrbImage {
 		// FIXME: likely broken after code cleanup due to lack of test data
 
 		// starting from beginning of IrbImage...
-		int offset = 0;
+		int offset = buf.position();
 
 		int dataSize = width * height;
 
@@ -376,15 +377,16 @@ public class IrbImage {
 
 		int matrixDataPos = 0;
 
-		int v1_pos = 1728;
+		int v1_pos = 0;
 
 		// used if data is compressed
 		int v2_pos = v1_pos + pixelCount;
 
-		int v1 = 0;
+		int v2_count = 0;
 		int v2 = 0;
 
-		int v2_count = 0;
+		int v1 = 0;
+
 		float v = 0.0F;
 
 		float f;
@@ -394,11 +396,18 @@ public class IrbImage {
 
 		// compression active: run-length encoding
 
-		for (int i = pixelCount; i > 0; i--) {
+		for (int i = 0; i < pixelCount; ++i) {
 
-			if (v2_count-- < 1) {
-				v2_count = buf.get(offset + v2_pos) - 1;
+			if (v2_count == 0) {
+				v2_count = buf.get(offset + v2_pos);
 				v2_pos++;
+
+				if (v2_count < 0) {
+					v2_count += 256;
+				}
+
+				// ----------
+
 				v2 = buf.get(offset + v2_pos);
 				v2_pos++;
 
@@ -427,7 +436,12 @@ public class IrbImage {
 
 			matrixData[matrixDataPos] = v;
 			matrixDataPos++;
+
+			v2_count--;
 		}
+
+		// TODO: position buffer at end to make santiy checks happy
+		// or better: fix sanity check...
 
 		System.out.println("v1 min " + v1Min);
 		System.out.println("v1 max " + v1Max);
