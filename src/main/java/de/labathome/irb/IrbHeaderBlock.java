@@ -17,10 +17,6 @@ public class IrbHeaderBlock {
 	public int dword6;
 	public int dword7;
 	public int dword8;
-//	public int headerOffset;
-//	public int headerSize;
-//	public int imageOffset;
-//	public int imageSize;
 
 	private IrbHeaderBlock() { }
 
@@ -44,18 +40,6 @@ public class IrbHeaderBlock {
 
 		headerBlock.size = buf.getInt();
 		// 20
-//
-//		// head has fixed size of 0x6C0
-//		// but check against headerSize...
-//		headerSize = 0x6C0;
-//		if (headerSize > size) {
-//			headerSize = size;
-//		}
-//
-//		headerOffset = 0;
-//
-//		imageOffset = headerSize;
-//		imageSize = size - imageOffset;
 
 		headerBlock.dword6 = buf.getInt();
 		// 24
@@ -64,7 +48,9 @@ public class IrbHeaderBlock {
 		headerBlock.dword8 = buf.getInt();
 		//32
 
-//		System.out.printf("# IrbHeaderBlock blockType=%s [%d] frameIndex=%d offset=%d size=%d\n", blockType.toString(), blockType.value(), frameIndex, offset, size);
+//		System.out.printf("# IrbHeaderBlock blockType=%s [%d] frameIndex=%d offset=%d size=%d\n",
+//				headerBlock.blockType.toString(), headerBlock.blockType.value(),
+//				headerBlock.frameIndex, headerBlock.offset, headerBlock.size);
 
 		if (buf.position() - initialPosition != 32) {
 			throw new RuntimeException("byte counting error in parsing of IrbHeaderBlock");

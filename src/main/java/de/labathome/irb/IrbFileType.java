@@ -10,13 +10,13 @@ public enum IrbFileType {
 	/** single image; identified by "IRBACS\0\0" */
 	IMAGE("IRBACS\0\0"),
 
-	/** sequence of images; idenfitied by "IRBIS 3\0" */
+	/** sequence of images; identified by "IRBIS 3\0" */
 	SEQUENCE("IRBIS 3\0"),
 
-	/** specific camera model; identified by "VARIOCAM" */
+	/** specific camera model; identified by "VARIOCAM"; can also be video! */
 	VARIOCAM("VARIOCAM"),
 
-	/** what is this ??? */
+	/** what is this ??? some kind of video file ??? */
 	O_SAVE_IRB("oSaveIRB");
 
 	private IrbFileType(String content) {
@@ -31,6 +31,6 @@ public enum IrbFileType {
 				return t;
 			}
 		}
-		return null;
+		throw new RuntimeException("unknown IrbFileType: '" + content + "'");
 	}
 }

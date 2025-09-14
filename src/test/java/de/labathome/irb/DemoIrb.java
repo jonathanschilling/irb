@@ -6,7 +6,9 @@
 package de.labathome.irb;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import aliceinnets.python.jyplot.JyPlot;
 
@@ -92,9 +94,11 @@ public class DemoIrb {
 
 		// Provided by David Jessop
 //		final String filename = folder + "AD071802.irb"; // single image; has non-empty EMPTY block
-//		final String filename = folder + "AC032701.irb"; // video?
+//		final String filename = folder + "AC032701.irb"; // video; compression type 2
 //		final String filename = folder + "AA022000.irb"; // single shot, old format, includes mystery block
 //		final String filename = folder + "AB022100.irb"; // large video, with CSV reference data available; 454 frames?
+
+//		final String filename = folder + "image.irb"; // from https://github.com/gadomski/irb-rs/blob/main/data/image.irb
 
 		IrbFile irbFile = IrbFile.fromFile(filename);
 
@@ -106,14 +110,30 @@ public class DemoIrb {
 
 		JyPlot plt = new JyPlot();
 
+		int preview_index = 0;
+		for (IrbPreview preview: irbFile.previews) {
+			plt.figure();
+			plt.imshow(preview.getPreviewImage(), "cmap='jet'");
+			plt.colorbar();
+			plt.title("preview " + preview_index);
+
+			// dump preview image as PGM file
+//			writePGM8(new File("preview_" + preview_index + ".pgm"), preview.width, preview.height, preview.image);
+
+			++preview_index;
+		}
+
 		int imageIndex = 0;
 		for (IrbImage image: irbFile.images) {
-	        plt.figure();
+//	        plt.figure("figsize=(12,20)");
+			plt.figure();
 	        plt.imshow(image.getCelsiusImage(), "cmap='jet'");
 //	        plt.imshow(image.getCelsiusImage(), "cmap='gist_ncar'");
 //	        plt.imshow(image.getCelsiusImage(), "cmap='nipy_spectral'");
 	        plt.colorbar();
 	        plt.title(String.format("image %d", imageIndex));
+
+//	        plt.savefig("image_" + imageIndex + ".png");
 
 	        imageIndex++;
 		}
@@ -140,4 +160,24 @@ public class DemoIrb {
         plt.show();
         plt.exec();
 	}
+
+	  /* Write a PGM (P5) file from an 8-bit grayscale byte[] (values 0..255). */
+    public static void writePGM8(File outFile, int width, int height, byte[] pixels) {
+        /* Validate array length matches width*height */
+        if (pixels == null || pixels.length != width * height) {
+            throw new IllegalArgumentException("pixels length must be width*height for 8-bit PGM");
+        }
+
+        /* Open the output stream */
+        try (FileOutputStream fos = new FileOutputStream(outFile)) {
+            /* Build and write the ASCII header: magic, dimensions, maxval */
+            String header = "P5\n" + width + " " + height + "\n255\n";
+            fos.write(header.getBytes(StandardCharsets.US_ASCII));
+
+            /* Write raw 8-bit pixel data as-is */
+            fos.write(pixels);
+        } catch (IOException e) {
+        	e.printStackTrace();
+        }
+    }
 }
