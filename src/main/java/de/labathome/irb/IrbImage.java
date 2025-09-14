@@ -149,6 +149,8 @@ public class IrbImage {
 			return;
 		}
 
+		data = new float[height][width];
+
 		switch (compression_type) {
 		case 0:
 			readImageDataUncompressed(buf);
@@ -162,6 +164,8 @@ public class IrbImage {
 		default:
 			throw new RuntimeException("unknown compression type: " + compression_type);
 		}
+
+		updateDataRange();
 	}
 
 	private void readImageHeader(ByteBuffer buf) {
@@ -359,10 +363,6 @@ public class IrbImage {
 	private void readImageDataUncompressed(ByteBuffer buf) {
 		final int initialPosition = buf.position();
 
-		minData = Float.POSITIVE_INFINITY;
-		maxData = Float.NEGATIVE_INFINITY;
-
-		data = new float[height][width];
 		for (int y = 0; y < height; ++y) {
 			for (int x = 0; x < width; ++x) {
 
@@ -384,15 +384,9 @@ public class IrbImage {
 					v = 0.0F; // or 255 ...
 				}
 
-				minData = Math.min(minData, v);
-				maxData = Math.max(maxData, v);
-
 				data[y][x] = v;
 			}
 		}
-
-//		System.out.println("data min: " + minData);
-//		System.out.println("data max: " + maxData);
 
 		if (buf.position() - initialPosition != (height * width * 2)) {
 			throw new RuntimeException("byte counting error in parsing of IrbImage pixel data");
@@ -400,16 +394,11 @@ public class IrbImage {
 	}
 
 	private void readImageDataCompressed1(ByteBuffer buf) {
-
-		// starting from beginning of IrbImage...
 		int offset = buf.position();
 
 		int dataSize = width * height;
 
 		int pixelCount = dataSize;
-		float[] matrixData = new float[pixelCount];
-
-		int matrixDataPos = 0;
 
 		int v1_pos = 0;
 
@@ -419,76 +408,50 @@ public class IrbImage {
 		int v2_count = 0;
 		int v2 = 0;
 
-		int v1Min = 1000;
-		int v1Max = -1000;
-
 		// compression active: run-length encoding
+		for (int y = 0; y < height; ++y) {
+			for (int x = 0; x < width; ++x) {
+				if (v2_count == 0) {
+					v2_count = buf.get(offset + v2_pos);
+					if (v2_count < 0) {
+						v2_count += 256;
+					}
 
-		for (int i = 0; i < pixelCount; ++i) {
+					v2_pos++;
 
-			if (v2_count == 0) {
-				v2_count = buf.get(offset + v2_pos);
-				if (v2_count < 0) {
-					v2_count += 256;
+					// ----------
+
+					v2 = buf.get(offset + v2_pos);
+					if (v2 < 0) {
+						v2 += 256;
+					}
+
+					v2_pos++;
 				}
 
-				v2_pos++;
-
-				// ----------
-
-				v2 = buf.get(offset + v2_pos);
-				if (v2 < 0) {
-					v2 += 256;
+				int v1 = buf.get(offset + v1_pos);
+				if (v1 < 0) {
+					v1 += 256;
 				}
 
-				v2_pos++;
+				v1_pos++;
+
+				float f = v1 / 256.0F;
+
+				// linear interpolation between neighboring palette entries
+				float v = palette[v2 + 1] * f + palette[v2] * (1.0F - f);
+				if (v < 0.0F) {
+					v = 0.0F; // or 255 ...
+				}
+
+				data[y][x] = v;
+
+				v2_count--;
 			}
-
-			int v1 = buf.get(offset + v1_pos);
-			if (v1 < 0) {
-				v1 += 256;
-			}
-
-			v1_pos++;
-
-			v1Min = Math.min(v1Min, v1);
-			v1Max = Math.max(v1Max, v1);
-
-			float f = v1 / 256.0F;
-
-			// linear interpolation between neighboring palette entries
-			float v = palette[v2 + 1] * f + palette[v2] * (1.0F - f);
-			if (v < 0.0F) {
-				v = 0.0F; // or 255 ...
-			}
-
-			matrixData[matrixDataPos] = v;
-			matrixDataPos++;
-
-			v2_count--;
 		}
 
 		// TODO: position buffer at end to make santiy checks happy
 		// or better: fix sanity check...
-
-		System.out.println("v1 min " + v1Min);
-		System.out.println("v1 max " + v1Max);
-
-		minData = Float.POSITIVE_INFINITY;
-		maxData = Float.NEGATIVE_INFINITY;
-
-		data = new float[height][width];
-		for (int i = 0; i < pixelCount; ++i) {
-			final int row = i / width;
-			final int col = i % width;
-			data[row][col] = matrixData[i];
-
-			minData = Math.min(minData, matrixData[i]);
-			maxData = Math.max(maxData, matrixData[i]);
-		}
-
-		System.out.println("data min: " + minData);
-		System.out.println("data max: " + maxData);
 	}
 
 	// Put a simple container around the bit-buffer logic so the core stays readable.
@@ -563,8 +526,6 @@ public class IrbImage {
 		byte[] compressed = new byte[size];
 		buf.get(compressed);
 
-		data = new float[height][width];
-
 		// Compute total number of pixels to decode
         final int n = width * height;
 
@@ -578,9 +539,6 @@ public class IrbImage {
         }
 		// TODO: figure out if this scaling is correct - looks somewhat reasonable for an example though
         data[0][0] = pixel_value / 100.0F;
-
-        minData = data[0][0];
-        maxData = data[0][0];
 
         // Prepare to decode the remaining (n - 1) deltas
         final BitReaderLE16MSB br = new BitReaderLE16MSB(compressed, 2);
@@ -632,9 +590,6 @@ public class IrbImage {
             }
             data[y][x] = pixel_value / 100.0F;
 
-            minData = Math.min(minData, data[y][x]);
-            maxData = Math.max(minData, data[y][x]);
-
             // Advance raster position
             x++;
             if (x == width) {
@@ -643,11 +598,24 @@ public class IrbImage {
             }
         }
 
-
-
 		if (buf.position() - offset != size) {
 			throw new RuntimeException("byte counting error in parsing of IrbImage pixel data");
 		}
+	}
+
+	private void updateDataRange() {
+		minData = Float.POSITIVE_INFINITY;
+		maxData = Float.NEGATIVE_INFINITY;
+
+		for (int y = 0; y < height; ++y) {
+			for (int x = 0; x < width; ++x) {
+				minData = Math.min(minData, data[y][x]);
+				maxData = Math.max(maxData, data[y][x]);
+			}
+		}
+
+		System.out.println("data min: " + minData);
+		System.out.println("data max: " + maxData);
 	}
 
 	/**
