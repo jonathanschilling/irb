@@ -579,6 +579,9 @@ public class IrbImage {
 		// TODO: figure out if this scaling is correct - looks somewhat reasonable for an example though
         data[0][0] = pixel_value / 100.0F;
 
+        minData = data[0][0];
+        maxData = data[0][0];
+
         // Prepare to decode the remaining (n - 1) deltas
         final BitReaderLE16MSB br = new BitReaderLE16MSB(compressed, 2);
 
@@ -629,6 +632,9 @@ public class IrbImage {
             }
             data[y][x] = pixel_value / 100.0F;
 
+            minData = Math.min(minData, data[y][x]);
+            maxData = Math.max(minData, data[y][x]);
+
             // Advance raster position
             x++;
             if (x == width) {
@@ -636,6 +642,8 @@ public class IrbImage {
                 y++;
             }
         }
+
+
 
 		if (buf.position() - offset != size) {
 			throw new RuntimeException("byte counting error in parsing of IrbImage pixel data");
