@@ -37,3 +37,7 @@ hs_err_pid*
 *.irb.tags
 
 *.png
+
+*.bin
+*.csv
+

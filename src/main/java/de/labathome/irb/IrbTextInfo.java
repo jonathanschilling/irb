@@ -27,7 +27,7 @@ public class IrbTextInfo {
 
 		final int initialPosition = buf.position();
 
-		// TODO: implement parsing preview image
+		// TODO: implement parsing additional meta-data at end of TEXT_INFO block
 		byte[] textInfoBytes = new byte[size];
 		buf.get(textInfoBytes);
 		textInfo.textInfo = new String(textInfoBytes);

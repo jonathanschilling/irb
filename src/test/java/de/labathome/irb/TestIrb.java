@@ -76,7 +76,7 @@ public class TestIrb {
 
 			// image header
 			Assertions.assertEquals(2, image.bytesPerPixel);
-			Assertions.assertEquals(0, image.compressed);
+			Assertions.assertEquals(0, image.compression_type);
 			Assertions.assertEquals(640, image.width);
 			Assertions.assertEquals(480, image.height);
 			Assertions.assertEquals(1.0F, image.emissivity);

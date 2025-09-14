@@ -35,7 +35,7 @@ public class IrbFile {
 	public List<IrbImage> images;
 	public List<IrbPreview> previews;
 	public List<IrbTextInfo> textInfos;
-	public List<IrbHeader> headers;
+	public List<IrbFrameHeader> headers;
 
 	// video data
 	public List<IrbFile> frames;
@@ -46,14 +46,18 @@ public class IrbFile {
 		}
 
 		RandomAccessFile memoryFile = new RandomAccessFile(filename, "r");
-		MappedByteBuffer buf = memoryFile.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, memoryFile.length());
+
+		long file_size = memoryFile.length();
+		System.out.println("file size: " + file_size);
+
+		MappedByteBuffer buf = memoryFile.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, file_size);
 
 		IrbFile irb = IrbFile.read(buf, false);
 
 		if (irb.header.fileType == IrbFileType.O_SAVE_IRB) {
 
 			// preview image
-			IrbImage frontMatter = new IrbImage(buf, false);
+			IrbImage frontMatter = new IrbImage(buf, 0, 0, false);
 			irb.images.add(frontMatter);
 
 			// now read frames, appended one after another
@@ -94,6 +98,32 @@ public class IrbFile {
 			irb.headerBlocks.add(headerBlock);
 		}
 
+		// sort header blocks by appearance in the file
+		irb.headerBlocks.sort((IrbHeaderBlock a, IrbHeaderBlock b) -> { return a.offset - b.offset; });
+
+		// print in order of appearance in the file
+		// and check if header block data is continuous and spans the whole buffer size
+		int lastDataStart = irb.header.blockOffset + irb.header.blockCount * 32;
+		for (IrbHeaderBlock headerBlock: irb.headerBlocks) {
+			System.out.printf("# IrbHeaderBlock blockType=%s [%d] frameIndex=%d offset=%d size=%d\n",
+					headerBlock.blockType.toString(), headerBlock.blockType.value(),
+					headerBlock.frameIndex, headerBlock.offset, headerBlock.size);
+
+			// EMPTY header block is expected to have offset=0, size=0 -> ignore that case
+			if (headerBlock.offset != lastDataStart &&
+					!(headerBlock.blockType == IrbBlockType.EMPTY && headerBlock.offset == 0 && headerBlock.size == 0)) {
+				System.out.printf("  WARNING: block data does not line up: expected offset=%d, but read pointer is at %d\n",
+						headerBlock.offset, lastDataStart);
+			}
+
+			// move current file position marker by size of data block denoted in corresponding header block
+			lastDataStart += headerBlock.size;
+		}
+		if (lastDataStart != buf.capacity()) {
+			System.out.printf("  WARNING: mismatch between declared blocks and file size: declared end at %d, actual file size %d\n",
+					lastDataStart, buf.capacity());
+		}
+
 		// read actual image data
 		irb.images = new LinkedList<>();
 		irb.previews = new LinkedList<>();
@@ -121,42 +151,60 @@ public class IrbFile {
 				IrbTextInfo textInfo = IrbTextInfo.fromBuffer(buf, initialPosition + block.offset, block.size);
 				irb.textInfos.add(textInfo);
 				break;
-			case HEADER: // 4
-				IrbHeader header = IrbHeader.fromBuffer(buf, initialPosition + block.offset, block.size);
+			case FRAME_HEADER: // 4
+				IrbFrameHeader header = IrbFrameHeader.fromBuffer(buf, initialPosition + block.offset, block.size);
 				irb.headers.add(header);
 				break;
 			case TODO_MYSTERY_5: // 5
 				System.out.println("TODO: mystery block 5 - ignored for now");
+				buf.position(initialPosition + block.offset + block.size);
 				break;
 			case TODO_MYSTERY_6: // 6
 				System.out.println("TODO: mystery block 6 - ignored for now");
+				buf.position(initialPosition + block.offset + block.size);
 				break;
 			case AUDIO: // 7
 				System.out.println("TODO: AUDIO block - ignored for now");
+				buf.position(initialPosition + block.offset + block.size);
 				break;
 			default:
 				throw new RuntimeException("block not implemented yet: " + block.blockType);
 			}
 		}
 
-		if (isVideoFrameFirstRead && buf.remaining() > 0) {
-			// expect an IMAGE header block
-			IrbHeaderBlock imageHeaderBlock = IrbHeaderBlock.fromBuffer(buf);
-			if (imageHeaderBlock.blockType != IrbBlockType.IMAGE) {
-				throw new RuntimeException("expecting IMAGE header block, but got " + imageHeaderBlock.blockType);
+		if (buf.remaining() > 0) {
+			if (isVideoFrameFirstRead) {
+				// expect an IMAGE header block
+				IrbHeaderBlock imageHeaderBlock = IrbHeaderBlock.fromBuffer(buf);
+				if (imageHeaderBlock.blockType != IrbBlockType.IMAGE) {
+					throw new RuntimeException("expecting IMAGE header block, but got " + imageHeaderBlock.blockType);
+				}
+
+	//			System.out.println("  frame index: " + imageHeaderBlock.frameIndex);
+
+				// expect a HEADER header block
+				IrbHeaderBlock headerHeaderBlock = IrbHeaderBlock.fromBuffer(buf);
+				if (headerHeaderBlock.blockType != IrbBlockType.FRAME_HEADER) {
+					throw new RuntimeException("expecting HEADER header block, but got " + headerHeaderBlock.blockType);
+				}
+
+				// now comes the actual frame image
+				IrbImage image = new IrbImage(buf, 0, 0, /*isVideoFrameFirstRead=*/false);
+				irb.images.add(image);
+			} else if (irb.header.fileType == IrbFileType.VARIOCAM) {
+				System.out.println("trying to interpret as VARIOCAM video...");
+
+				IrbFrameHeader last_frame_header = irb.headers.get(irb.headers.size() - 1);
+				while (last_frame_header.expected_next_offset != last_frame_header.offset) {
+					// read current frame
+					IrbImage next_frame = IrbImage.fromBuffer(buf, last_frame_header.offset, last_frame_header.size, false);
+					irb.images.add(next_frame);
+
+					// expect another frame header after current frame
+					last_frame_header = IrbFrameHeader.fromBuffer(buf, buf.position(), 64);
+					irb.headers.add(last_frame_header);
+				}
 			}
-
-//			System.out.println("  frame index: " + imageHeaderBlock.frameIndex);
-
-			// expect a HEADER header block
-			IrbHeaderBlock headerHeaderBlock = IrbHeaderBlock.fromBuffer(buf);
-			if (headerHeaderBlock.blockType != IrbBlockType.HEADER) {
-				throw new RuntimeException("expecting HEADER header block, but got " + headerHeaderBlock.blockType);
-			}
-
-			// now comes the actual frame image
-			IrbImage image = new IrbImage(buf, /*isVideoFrameFirstRead=*/false);
-			irb.images.add(image);
 		}
 
 		return irb;
